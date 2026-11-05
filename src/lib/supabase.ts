@@ -7,4 +7,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase URL dan Anon Key belum diatur di file .env');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey); 
