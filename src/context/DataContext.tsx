@@ -21,18 +21,39 @@ interface DataContextType {
   deleteProgram: (divisionSlug: string, index: number) => Promise<void>;
 }
 
+// URUTAN DIVISI RESMI (TIDAK BOLEH BERUBAH)
+const DIVISION_ORDER = [
+  'kahim-wakahim',
+  'sekretaris',
+  'bendahara',
+  'psdm',
+  'kominfo',
+  'ristek',
+  'kewirausahaan',
+  'humas',
+];
+
+// Helper fungsi untuk mengurutkan divisi secara ketat
+const sortDivisions = (list: DivisionDetail[]): DivisionDetail[] => {
+  return [...list].sort((a, b) => {
+    const indexA = DIVISION_ORDER.indexOf(a.slug);
+    const indexB = DIVISION_ORDER.indexOf(b.slug);
+    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+  });
+};
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
 const AUTH_SESSION_KEY = 'hmif_admin_session';
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [divisions, setDivisions] = useState<DivisionDetail[]>(initialDivisionsData);
+  const [divisions, setDivisions] = useState<DivisionDetail[]>(() => sortDivisions(initialDivisionsData));
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     return localStorage.getItem(AUTH_SESSION_KEY) === 'true';
   });
   const [adminUsername, setAdminUsername] = useState<string>('admin');
 
-  // Ambil data langsung dari cloud Supabase saat web dimuat
+  // Ambil data langsung dari Supabase & wajib diurutkan
   const fetchDivisions = async () => {
     try {
       setIsLoading(true);
@@ -50,7 +71,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           members: row.members || [],
           programs: row.programs || [],
         }));
-        setDivisions(formatted);
+        
+        // KUNCI URUTAN SECARA KETAT SEBELUM DIMASUKKAN KE STATE
+        setDivisions(sortDivisions(formatted));
       }
     } catch (err) {
       console.error('Gagal mengambil data dari Supabase:', err);
@@ -91,7 +114,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(AUTH_SESSION_KEY);
   };
 
-  // Ganti Password & Username Admin di Cloud
+  // Ganti Password & Username Admin
   const changeCredentials = async (newUsername: string, newPassword: string) => {
     await supabase
       .from('admin_creds')
@@ -119,7 +142,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updated = prev.map((d) => (d.slug === slug ? { ...d, leader } : d));
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -128,7 +151,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updated = prev.map((d) => (d.slug === slug ? { ...d, coLeader } : d));
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -139,7 +162,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -155,7 +178,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -169,7 +192,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -181,7 +204,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -197,7 +220,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
@@ -211,7 +234,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return updated;
+      return sortDivisions(updated);
     });
   };
 
