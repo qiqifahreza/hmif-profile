@@ -38,12 +38,12 @@ export const Hero: React.FC = () => {
             <ArrowRight size={16} />
           </a>
           <a
-            href="/#dosen"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-primary bg-surface/80 hover:bg-primary text-secondary hover:text-white font-medium transition-all"
-          >
-            <BookOpen size={18} />
-            Dosen Departemen
-          </a>
+  href="/#proker"
+  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-[#3c3c44] bg-[#232329]/80 hover:bg-[#3c3c44] text-[#bebeca] hover:text-white font-medium transition-all"
+>
+  <BookOpen size={18} />
+  Program Kerja
+</a>
         </div>
       </div>
     </section>

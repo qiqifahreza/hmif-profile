@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { User, ShieldCheck, Calendar, ArrowLeft } from 'lucide-react';
-import { divisionsData } from '../data/divisionsData';
 import type { Member } from '../types';
+import { useData } from '../context/DataContext';
 
+// Subkomponen Avatar Pengurus...
 // ==========================================
 // 1. FRAME FOTO AVATAR BERGAYA LIQUID GLASS
 // ==========================================
@@ -44,7 +45,8 @@ const MemberAvatar: React.FC<{ member: Member; isLeader: boolean }> = ({ member,
 
 export const DivisionPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const division = divisionsData.find((d) => d.slug === slug);
+    const { divisions } = useData();
+    const division = divisions.find((d) => d.slug === slug);
 
   if (!division) {
     return (

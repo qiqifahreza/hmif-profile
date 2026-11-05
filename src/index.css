@@ -80,3 +80,8 @@ html {
 .animate-liquid {
   animation: fluid-float 12s ease-in-out infinite alternate;
 }
+
+/* Samarkan teks biasa agar tampil seperti titik-titik password */
+.password-mask {
+  -webkit-text-security: disc !important;
+}

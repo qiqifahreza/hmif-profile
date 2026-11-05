@@ -1,4 +1,4 @@
-import type { DivisionDetail, Lecturer } from '../types';
+import type { DivisionDetail} from '../types';
 
 export const divisionsData: DivisionDetail[] = [
   {
@@ -355,63 +355,5 @@ export const divisionsData: DivisionDetail[] = [
         period: 'Time_Interval|Periodicity' 
       }
     ]
-  }
-];
-
-export const lecturersData: Lecturer[] = [
-  { 
-    name: 'Doni Setio Pambudi, S.Kom., M.Kom., MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/99ce877d565fac657685503c58a22800.jpg' 
-  },
-  { 
-    name: 'Lailatul Hidayah, S.Kom., M.S., MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/d65a77f0599a4361c8b94bacbdcfc428.jpg' 
-  },
-  { 
-    name: 'Moch. Nurul Indra Al Fauzan, S.Kom., M.Eng.', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/45aa961708cff739422a610f1e98c407.JPG' 
-  },
-  { 
-    name: 'Mohammad Arif Rasyidi, S.Kom., M.Sc., MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/02fd2ef79f8c319fa31de58d2b91493c.jpg' 
-  },
-  { 
-    name: 'Muhammad Zain Fawwaz Nuruddin Siswantoro, S.Kom., M.Kom., MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/34ec0f87f4d8a199bbfde598e4f8ee0a.JPG' 
-  },
-  { 
-    name: 'Ngatini, S.Si., M.Si., MCE, MOS', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/f5a58d878b70c27eb0a72167af542a57.jpg' 
-  },
-  { 
-    name: 'Puji Andayani, S.Si., M.Si., M.Sc., MCE, MOS', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/e8d567cae3e309fe9069fec5bb4cbd43.jpg' 
-  },
-  { 
-    name: 'Rangga Kurnia Putra Wiratama, S.Kom, M.Kom., MOS', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/061ccf6b544236dabb4c4191b97a9d75.jpg' 
-  },
-  { 
-    name: 'Ruktin Handayani, S.Kom., M.Kom., MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/5def761788c4addc22cc0ad5315fbb06.jpg' 
-  },
-  { 
-    name: 'Taufiqotul Bariyah, S.Kom., M.IM., MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/9fcf2caadcad72fa0e54c79d5b5efcc7.jpg' 
-  },
-  { 
-    name: 'Yohanes Indra Riskajaya, S.Kom., M.Kom., MTA, MCE', 
-    role: 'Dosen Departemen Informatika',
-    imageUrl: 'https://gapura.uisi.ac.id/assets/upload/user/300x300/fc3191b04b697104342d8dfce9a0db2f.jpg' 
   }
 ];

@@ -53,12 +53,6 @@ export interface DivisionDetail {
   programs: DivisionProker[];
 }
 
-export interface Lecturer {
-  name: string;
-  role: string;
-  imageUrl?: string;
-}
-
 export interface EventProgram {
   id: string;
   title: string;

@@ -1,34 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Terminal, ChevronDown, Menu, X } from 'lucide-react';
-import { divisionsData } from '../data/divisionsData';
+import { useData } from '../context/DataContext';
+import logoImg from '../assets/logo.png'; // Cara import asset resmi Vite
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    
-  // State jika gambar gagal dimuat
+  const { divisions } = useData(); // Pakai data dari context
   const [logoError, setLogoError] = useState(false);
-
-  // GANTI DENGAN URL GAMBAR GOOGLE ATAU PATH LOKAL ANDA
-  const LOGO_URL = "/src/assets/logo.png"; // Contoh: jika gambar ada di folder public, gunakan "/logo.png"
-  // Atau jika pakai file di folder public: const LOGO_URL = "/logo.png";
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-dark/90 backdrop-blur-md z-50 border-b border-primary text-secondary">
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* LOGO BRAND BARU */}
+          {/* Logo Brand */}
           <Link to="/" className="flex items-center space-x-3 text-white hover:text-secondary transition-colors group">
             <div className="w-9 h-9 rounded-full overflow-hidden bg-primary/70 border border-secondary/30 flex items-center justify-center p-1 group-hover:border-secondary transition-all shadow-md">
               {!logoError ? (
                 <img
-                  src={LOGO_URL}
+                  src={logoImg}
                   alt="Logo HMIF UISI"
                   referrerPolicy="no-referrer"
                   onError={() => setLogoError(true)}
-                  className="w-full h-full rounded-lg object-contain"
+                  className="w-full h-full rounded-full object-contain"
                 />
               ) : (
                 <Terminal size={18} className="text-secondary" />
@@ -36,7 +31,6 @@ export const Navbar: React.FC = () => {
             </div>
             <span className="font-bold text-lg tracking-wider text-white">HMIF UISI</span>
           </Link>
-
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
@@ -61,7 +55,8 @@ export const Navbar: React.FC = () => {
                   onMouseLeave={() => setIsDropdownOpen(false)}
                   className="absolute left-0 mt-0 w-64 bg-surface border border-primary rounded-xl shadow-2xl py-2 z-50"
                 >
-                  {divisionsData.map((div) => (
+                  {/* Menggunakan data dinamis divisions */}
+                  {divisions.map((div) => (
                     <Link
                       key={div.slug}
                       to={`/divisi/${div.slug}`}
@@ -77,9 +72,6 @@ export const Navbar: React.FC = () => {
 
             <a href="/#tentang" className="text-secondary hover:text-white text-sm font-medium transition-colors">
               Tentang
-            </a>
-            <a href="/#dosen" className="text-secondary hover:text-white text-sm font-medium transition-colors">
-              Dosen
             </a>
             <a href="/#proker" className="text-secondary hover:text-white text-sm font-medium transition-colors">
               Program Kerja
@@ -115,7 +107,8 @@ export const Navbar: React.FC = () => {
           <div className="py-2 border-t border-primary text-xs font-semibold text-secondary/60 uppercase tracking-wider">
             Divisi Kabinet Samvaya
           </div>
-          {divisionsData.map((div) => (
+          {/* Menggunakan data dinamis divisions */}
+          {divisions.map((div) => (
             <Link
               key={div.slug}
               to={`/divisi/${div.slug}`}
@@ -132,13 +125,7 @@ export const Navbar: React.FC = () => {
           >
             Tentang
           </a>
-          <a
-            href="/#dosen"
-            onClick={() => setIsOpen(false)}
-            className="block py-2 text-secondary hover:text-white font-medium"
-          >
-            Dosen
-          </a>
+          {/* Link Dosen sudah dibersihkan */}
           <a
             href="#kontak"
             onClick={() => setIsOpen(false)}
