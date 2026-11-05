@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@source "/index.html";
+@source "/src/**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --color-primary: #3c3c44;
+  --color-primary-light: #4e4e58;
+  --color-secondary: #bebeca;
+  --color-secondary-dim: #92929e;
+  --color-dark: #121215;
+  --color-surface: #1e1e24;
+}
+
+body {
+  background-color: var(--color-dark);
+  color: var(--color-secondary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* === EFEK LIQUID GLASS === */
+.liquid-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(60, 60, 68, 0.45) 0%,
+    rgba(30, 30, 36, 0.25) 100%
+  );
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(190, 190, 202, 0.16);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px 0 rgba(190, 190, 202, 0.25);
+}
+
+.liquid-glass-card {
+  background: linear-gradient(
+    140deg,
+    rgba(60, 60, 68, 0.35) 0%,
+    rgba(25, 25, 30, 0.4) 100%
+  );
+  backdrop-filter: blur(14px) saturate(170%);
+  -webkit-backdrop-filter: blur(14px) saturate(170%);
+  border: 1px solid rgba(190, 190, 202, 0.14);
+  box-shadow: 
+    0 10px 30px -5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(190, 190, 202, 0.2);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass-card:hover {
+  background: linear-gradient(
+    140deg,
+    rgba(60, 60, 68, 0.55) 0%,
+    rgba(35, 35, 42, 0.5) 100%
+  );
+  border-color: rgba(190, 190, 202, 0.4);
+  box-shadow: 
+    0 20px 40px -10px rgba(0, 0, 0, 0.6),
+    0 0 25px -5px rgba(190, 190, 202, 0.15),
+    inset 0 1px 2px rgba(190, 190, 202, 0.45);
+  transform: translateY(-4px);
+}
+
+/* Animasi Cairan Mengalir di Background */
+@keyframes fluid-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -20px) scale(1.08);
+  }
+}
+
+.animate-liquid {
+  animation: fluid-float 12s ease-in-out infinite alternate;
+}
