@@ -11,6 +11,7 @@
     "lint:fix": "oxlint --fix"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "@tailwindcss/vite": "^4.3.4",
     "lucide-react": "^1.68.0",
     "react": "^19.3.1",

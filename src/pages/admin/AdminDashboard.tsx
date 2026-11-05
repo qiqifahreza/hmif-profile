@@ -84,21 +84,21 @@ export const AdminDashboard: React.FC = () => {
     }
     setShowProgramModal(false);
   };
-
-  // Simpan Akun Baru
-  const handleSaveAccount = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newUsername.trim() || !newPassword) {
-      alert('Username dan password tidak boleh kosong!');
-      return;
-    }
-    changeCredentials(newUsername, newPassword);
-    setAccountSuccessMsg('Akun berhasil diperbarui!');
-    setTimeout(() => {
-      setShowAccountModal(false);
-      setAccountSuccessMsg('');
-    }, 1200);
-  };
+  
+// ✅ Tambahkan "async" dan "await" pada changeCredentials
+const handleSaveAccount = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!newUsername.trim() || !newPassword) {
+    alert('Username dan password tidak boleh kosong!');
+    return;
+  }
+  await changeCredentials(newUsername, newPassword); // <-- Tambahkan await
+  setAccountSuccessMsg('Akun berhasil diperbarui!');
+  setTimeout(() => {
+    setShowAccountModal(false);
+    setAccountSuccessMsg('');
+  }, 1200);
+};
 
   return (
     <div className="min-h-screen bg-dark text-secondary pt-10 pb-20 px-4 sm:px-8">

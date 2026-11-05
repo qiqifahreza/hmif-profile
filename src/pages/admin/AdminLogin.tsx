@@ -14,14 +14,15 @@ export const AdminLogin: React.FC = () => {
   if (isAdmin) {
     return <Navigate to="/admin/dashboard" replace />;
   }
-
-  const executeLogin = () => {
-    if (login(username, password)) {
-      navigate('/admin/dashboard');
-    } else {
-      setError(true);
-    }
-  };
+// ✅ Tambahkan "async" dan "await"
+const executeLogin = async () => {
+  const success = await login(username, password);
+  if (success) {
+    navigate('/admin/dashboard');
+  } else {
+    setError(true);
+  }
+};
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {

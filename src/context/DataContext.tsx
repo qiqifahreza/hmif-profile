@@ -1,177 +1,227 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { divisionsData as initialDivisionsData } from '../data/divisionsData';
 import type { DivisionDetail, Member, DivisionProker } from '../types';
 
-interface AdminCredentials {
-  username: string;
-  password: string;
-}
-
 interface DataContextType {
   divisions: DivisionDetail[];
+  isLoading: boolean;
   isAdmin: boolean;
   adminUsername: string;
-  login: (user: string, pass: string) => boolean;
+  login: (user: string, pass: string) => Promise<boolean>;
   logout: () => void;
-  changeCredentials: (newUsername: string, newPassword: string) => void;
-  // CRUD Mahasiswa / Anggota
-  updateLeader: (divisionSlug: string, leader: Member) => void;
-  updateCoLeader: (divisionSlug: string, coLeader?: Member) => void;
-  addMember: (divisionSlug: string, member: Member) => void;
-  updateMember: (divisionSlug: string, index: number, member: Member) => void;
-  deleteMember: (divisionSlug: string, index: number) => void;
-  // CRUD Program Kerja
-  addProgram: (divisionSlug: string, program: DivisionProker) => void;
-  updateProgram: (divisionSlug: string, index: number, program: DivisionProker) => void;
-  deleteProgram: (divisionSlug: string, index: number) => void;
+  changeCredentials: (newUsername: string, newPassword: string) => Promise<void>;
+  updateLeader: (divisionSlug: string, leader: Member) => Promise<void>;
+  updateCoLeader: (divisionSlug: string, coLeader?: Member) => Promise<void>;
+  addMember: (divisionSlug: string, member: Member) => Promise<void>;
+  updateMember: (divisionSlug: string, index: number, member: Member) => Promise<void>;
+  deleteMember: (divisionSlug: string, index: number) => Promise<void>;
+  addProgram: (divisionSlug: string, program: DivisionProker) => Promise<void>;
+  updateProgram: (divisionSlug: string, index: number, program: DivisionProker) => Promise<void>;
+  deleteProgram: (divisionSlug: string, index: number) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
-const STORAGE_KEY = 'hmif_uisi_database_v2';
-const AUTH_KEY = 'hmif_uisi_admin_auth';
-const CREDENTIALS_KEY = 'hmif_uisi_admin_creds';
-
-const DEFAULT_CREDS: AdminCredentials = {
-  username: 'admin',
-  password: 'samvaya2026',
-};
+const AUTH_SESSION_KEY = 'hmif_admin_session';
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [divisions, setDivisions] = useState<DivisionDetail[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return initialDivisionsData;
-      }
-    }
-    return initialDivisionsData;
-  });
-
+  const [divisions, setDivisions] = useState<DivisionDetail[]>(initialDivisionsData);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    return localStorage.getItem(AUTH_KEY) === 'true';
+    return localStorage.getItem(AUTH_SESSION_KEY) === 'true';
   });
+  const [adminUsername, setAdminUsername] = useState<string>('admin');
 
-  const [credentials, setCredentials] = useState<AdminCredentials>(() => {
-    const saved = localStorage.getItem(CREDENTIALS_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return DEFAULT_CREDS;
+  // Ambil data langsung dari cloud Supabase saat web dimuat
+  const fetchDivisions = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.from('divisions').select('*');
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const formatted: DivisionDetail[] = data.map((row) => ({
+          slug: row.slug,
+          name: row.name,
+          shortName: row.short_name,
+          about: row.about,
+          leader: row.leader,
+          coLeader: row.co_leader,
+          members: row.members || [],
+          programs: row.programs || [],
+        }));
+        setDivisions(formatted);
       }
+    } catch (err) {
+      console.error('Gagal mengambil data dari Supabase:', err);
+    } finally {
+      setIsLoading(false);
     }
-    return DEFAULT_CREDS;
-  });
+  };
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(divisions));
-  }, [divisions]);
+    fetchDivisions();
+  }, []);
 
-  // Login dengan Username & Password
-  const login = (user: string, pass: string): boolean => {
-    if (user.trim() === credentials.username && pass === credentials.password) {
-      setIsAdmin(true);
-      localStorage.setItem(AUTH_KEY, 'true');
-      return true;
+  // Login via Database Cloud
+  const login = async (user: string, pass: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_creds')
+        .select('username, password')
+        .eq('id', 1)
+        .single();
+
+      if (error || !data) return false;
+
+      if (data.username === user.trim() && data.password === pass) {
+        setIsAdmin(true);
+        setAdminUsername(data.username);
+        localStorage.setItem(AUTH_SESSION_KEY, 'true');
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setIsAdmin(false);
-    localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(AUTH_SESSION_KEY);
   };
 
-  // Ganti Username & Password
-  const changeCredentials = (newUsername: string, newPassword: string) => {
-    const updated = {
-      username: newUsername.trim(),
-      password: newPassword,
-    };
-    setCredentials(updated);
-    localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(updated));
+  // Ganti Password & Username Admin di Cloud
+  const changeCredentials = async (newUsername: string, newPassword: string) => {
+    await supabase
+      .from('admin_creds')
+      .update({ username: newUsername.trim(), password: newPassword })
+      .eq('id', 1);
+    setAdminUsername(newUsername.trim());
   };
 
-  const updateLeader = (slug: string, leader: Member) => {
-    setDivisions((prev) =>
-      prev.map((d) => (d.slug === slug ? { ...d, leader } : d))
-    );
+  // Helper sinkronisasi divisi ke Supabase
+  const syncDivisionToSupabase = async (updatedDiv: DivisionDetail) => {
+    await supabase
+      .from('divisions')
+      .update({
+        leader: updatedDiv.leader,
+        co_leader: updatedDiv.coLeader,
+        members: updatedDiv.members,
+        programs: updatedDiv.programs,
+      })
+      .eq('slug', updatedDiv.slug);
   };
 
-  const updateCoLeader = (slug: string, coLeader?: Member) => {
-    setDivisions((prev) =>
-      prev.map((d) => (d.slug === slug ? { ...d, coLeader } : d))
-    );
+  // CRUD Mahasiswa & Pimpinan
+  const updateLeader = async (slug: string, leader: Member) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) => (d.slug === slug ? { ...d, leader } : d));
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
-  const addMember = (slug: string, member: Member) => {
-    setDivisions((prev) =>
-      prev.map((d) => (d.slug === slug ? { ...d, members: [...d.members, member] } : d))
-    );
+  const updateCoLeader = async (slug: string, coLeader?: Member) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) => (d.slug === slug ? { ...d, coLeader } : d));
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
-  const updateMember = (slug: string, index: number, member: Member) => {
-    setDivisions((prev) =>
-      prev.map((d) => {
+  const addMember = async (slug: string, member: Member) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) =>
+        d.slug === slug ? { ...d, members: [...d.members, member] } : d
+      );
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
+  };
+
+  const updateMember = async (slug: string, index: number, member: Member) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) => {
         if (d.slug === slug) {
-          const updated = [...d.members];
-          updated[index] = member;
-          return { ...d, members: updated };
+          const newMembers = [...d.members];
+          newMembers[index] = member;
+          return { ...d, members: newMembers };
         }
         return d;
-      })
-    );
+      });
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
-  const deleteMember = (slug: string, index: number) => {
-    setDivisions((prev) =>
-      prev.map((d) => {
+  const deleteMember = async (slug: string, index: number) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) => {
         if (d.slug === slug) {
           return { ...d, members: d.members.filter((_, i) => i !== index) };
         }
         return d;
-      })
-    );
+      });
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
-  const addProgram = (slug: string, program: DivisionProker) => {
-    setDivisions((prev) =>
-      prev.map((d) => (d.slug === slug ? { ...d, programs: [...d.programs, program] } : d))
-    );
+  // CRUD Program Kerja
+  const addProgram = async (slug: string, program: DivisionProker) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) =>
+        d.slug === slug ? { ...d, programs: [...d.programs, program] } : d
+      );
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
-  const updateProgram = (slug: string, index: number, program: DivisionProker) => {
-    setDivisions((prev) =>
-      prev.map((d) => {
+  const updateProgram = async (slug: string, index: number, program: DivisionProker) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) => {
         if (d.slug === slug) {
-          const updated = [...d.programs];
-          updated[index] = program;
-          return { ...d, programs: updated };
+          const newProgs = [...d.programs];
+          newProgs[index] = program;
+          return { ...d, programs: newProgs };
         }
         return d;
-      })
-    );
+      });
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
-  const deleteProgram = (slug: string, index: number) => {
-    setDivisions((prev) =>
-      prev.map((d) => {
+  const deleteProgram = async (slug: string, index: number) => {
+    setDivisions((prev) => {
+      const updated = prev.map((d) => {
         if (d.slug === slug) {
           return { ...d, programs: d.programs.filter((_, i) => i !== index) };
         }
         return d;
-      })
-    );
+      });
+      const target = updated.find((d) => d.slug === slug);
+      if (target) syncDivisionToSupabase(target);
+      return updated;
+    });
   };
 
   return (
     <DataContext.Provider
       value={{
         divisions,
+        isLoading,
         isAdmin,
-        adminUsername: credentials.username,
+        adminUsername,
         login,
         logout,
         changeCredentials,
