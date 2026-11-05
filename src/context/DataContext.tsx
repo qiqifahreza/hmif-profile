@@ -21,8 +21,8 @@ interface DataContextType {
   deleteProgram: (divisionSlug: string, index: number) => Promise<void>;
 }
 
-// URUTAN DIVISI RESMI (TIDAK BOLEH BERUBAH)
-const DIVISION_ORDER = [
+// URUTAN DIVISI BAKU DAN RESMI
+const STRICT_DIVISION_ORDER = [
   'kahim-wakahim',
   'sekretaris',
   'bendahara',
@@ -33,31 +33,49 @@ const DIVISION_ORDER = [
   'humas',
 ];
 
-// Helper fungsi untuk mengurutkan divisi secara ketat
-const sortDivisions = (list: DivisionDetail[]): DivisionDetail[] => {
-  return [...list].sort((a, b) => {
-    const indexA = DIVISION_ORDER.indexOf(a.slug);
-    const indexB = DIVISION_ORDER.indexOf(b.slug);
-    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+// FUNGSI PENATAAN ULANG MUTLAK (ANTI-ACAK)
+const enforceDivisionOrder = (list: DivisionDetail[]): DivisionDetail[] => {
+  const orderedList: DivisionDetail[] = [];
+
+  // 1. Susun persis sesuai urutan STRICT_DIVISION_ORDER
+  STRICT_DIVISION_ORDER.forEach((slug) => {
+    const found = list.find((item) => item.slug?.trim().toLowerCase() === slug);
+    if (found) {
+      orderedList.push(found);
+    }
   });
+
+  // 2. Bila ada divisi baru di luar 8 daftar ini, masukkan di paling belakang
+  list.forEach((item) => {
+    const itemSlug = item.slug?.trim().toLowerCase();
+    if (!STRICT_DIVISION_ORDER.includes(itemSlug)) {
+      orderedList.push(item);
+    }
+  });
+
+  return orderedList;
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 const AUTH_SESSION_KEY = 'hmif_admin_session';
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [divisions, setDivisions] = useState<DivisionDetail[]>(() => sortDivisions(initialDivisionsData));
+  const [divisions, setDivisions] = useState<DivisionDetail[]>(() => enforceDivisionOrder(initialDivisionsData));
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     return localStorage.getItem(AUTH_SESSION_KEY) === 'true';
   });
   const [adminUsername, setAdminUsername] = useState<string>('admin');
 
-  // Ambil data langsung dari Supabase & wajib diurutkan
+  // Ambil data langsung dari Supabase dengan sorting order_index
   const fetchDivisions = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.from('divisions').select('*');
+      const { data, error } = await supabase
+        .from('divisions')
+        .select('*')
+        .order('order_index', { ascending: true }); // <-- Diurutkan dari database
+
       if (error) throw error;
 
       if (data && data.length > 0) {
@@ -71,9 +89,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           members: row.members || [],
           programs: row.programs || [],
         }));
-        
-        // KUNCI URUTAN SECARA KETAT SEBELUM DIMASUKKAN KE STATE
-        setDivisions(sortDivisions(formatted));
+
+        // KUNCI URUTAN SEKALI LAGI DI LEVEL FRONTEND
+        setDivisions(enforceDivisionOrder(formatted));
       }
     } catch (err) {
       console.error('Gagal mengambil data dari Supabase:', err);
@@ -142,7 +160,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updated = prev.map((d) => (d.slug === slug ? { ...d, leader } : d));
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -151,7 +169,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updated = prev.map((d) => (d.slug === slug ? { ...d, coLeader } : d));
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -162,7 +180,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -178,7 +196,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -192,7 +210,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -204,7 +222,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -220,7 +238,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
@@ -234,7 +252,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const target = updated.find((d) => d.slug === slug);
       if (target) syncDivisionToSupabase(target);
-      return sortDivisions(updated);
+      return enforceDivisionOrder(updated);
     });
   };
 
