@@ -1,87 +1,134 @@
 @import "tailwindcss";
 
-@source "/index.html";
-@source "/src/**/*.{js,ts,jsx,tsx}";
+@source "../index.html";
+@source "../src/**/*.{js,ts,jsx,tsx}";
 
 @theme {
-  --color-primary: #3c3c44;
-  --color-primary-light: #4e4e58;
-  --color-secondary: #bebeca;
-  --color-secondary-dim: #92929e;
-  --color-dark: #121215;
-  --color-surface: #1e1e24;
+  --color-primary: var(--theme-primary);
+  --color-secondary: var(--theme-secondary);
+  --color-bg-main: var(--theme-bg);
+  --color-surface-main: var(--theme-surface);
+  --color-border-main: var(--theme-border);
+}
+
+/* ========================================================
+   LIGHT MODE: Primary & Secondary Dibalik
+   (Primary #3c3c44 jadi teks tegas, Secondary #bebeca jadi aksen)
+   ======================================================== */
+:root {
+  --theme-bg: #f8f9fb;
+  --theme-surface: rgba(255, 255, 255, 0.85);
+  --theme-border: rgba(190, 190, 202, 0.45);
+  --theme-text: #232329;
+  --theme-heading: #121215;
+  --theme-spotlight: rgba(60, 60, 68, 0.08);
+}
+
+/* ========================================================
+   DARK MODE: Teks Judul Selalu Terang (Putih / Silver #bebeca)
+   ======================================================== */
+.dark {
+  --theme-bg: #101014;
+  --theme-surface: rgba(30, 30, 36, 0.6);
+  --theme-border: rgba(190, 190, 202, 0.18);
+  --theme-text: #bebeca;
+  --theme-heading: #ffffff;
+  --theme-spotlight: rgba(190, 190, 202, 0.22);
 }
 
 body {
-  background-color: var(--color-dark);
-  color: var(--color-secondary);
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.4s ease, color 0.3s ease;
   overflow-x: hidden;
 }
 
-html {
-  scroll-behavior: smooth;
+/* Efek Kaca Cair (Liquid Glass) */
+.liquid-glass, .glass-effect {
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* === EFEK LIQUID GLASS === */
-.liquid-glass {
+.dark .liquid-glass, .dark .glass-effect {
   background: linear-gradient(
     135deg,
     rgba(60, 60, 68, 0.45) 0%,
-    rgba(30, 30, 36, 0.25) 100%
+    rgba(25, 25, 30, 0.35) 100%
   );
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
   border: 1px solid rgba(190, 190, 202, 0.16);
   box-shadow: 
-    0 8px 32px 0 rgba(0, 0, 0, 0.4),
+    0 10px 32px 0 rgba(0, 0, 0, 0.5),
     inset 0 1px 1px 0 rgba(190, 190, 202, 0.25);
 }
 
-.liquid-glass-card {
+html:not(.dark) .liquid-glass, html:not(.dark) .glass-effect {
   background: linear-gradient(
-    140deg,
-    rgba(60, 60, 68, 0.35) 0%,
-    rgba(25, 25, 30, 0.4) 100%
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(240, 243, 250, 0.6) 100%
   );
-  backdrop-filter: blur(14px) saturate(170%);
-  -webkit-backdrop-filter: blur(14px) saturate(170%);
-  border: 1px solid rgba(190, 190, 202, 0.14);
+  border: 1px solid rgba(190, 190, 202, 0.5);
   box-shadow: 
-    0 10px 30px -5px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(190, 190, 202, 0.2);
+    0 8px 30px rgba(0, 0, 0, 0.05),
+    inset 0 1px 2px #ffffff;
+}
+
+/* Kartu Kaca Cair Interaktif */
+.liquid-glass-card {
+  backdrop-filter: blur(16px) saturate(190%);
+  -webkit-backdrop-filter: blur(16px) saturate(190%);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.liquid-glass-card:hover {
+.dark .liquid-glass-card {
+  background: linear-gradient(
+    140deg,
+    rgba(60, 60, 68, 0.35) 0%,
+    rgba(25, 25, 30, 0.45) 100%
+  );
+  border: 1px solid rgba(190, 190, 202, 0.15);
+  box-shadow: 
+    0 12px 30px -5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(190, 190, 202, 0.2);
+}
+
+.dark .liquid-glass-card:hover {
   background: linear-gradient(
     140deg,
     rgba(60, 60, 68, 0.55) 0%,
-    rgba(35, 35, 42, 0.5) 100%
+    rgba(35, 35, 42, 0.6) 100%
   );
-  border-color: rgba(190, 190, 202, 0.4);
+  border-color: rgba(190, 190, 202, 0.5);
   box-shadow: 
-    0 20px 40px -10px rgba(0, 0, 0, 0.6),
-    0 0 25px -5px rgba(190, 190, 202, 0.15),
-    inset 0 1px 2px rgba(190, 190, 202, 0.45);
-  transform: translateY(-4px);
+    0 22px 45px -10px rgba(0, 0, 0, 0.65),
+    0 0 25px -5px rgba(190, 190, 202, 0.2),
+    inset 0 1px 2px rgba(190, 190, 202, 0.5);
+  transform: translateY(-5px);
 }
 
-/* Animasi Cairan Mengalir di Background */
-@keyframes fluid-float {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(30px, -20px) scale(1.08);
-  }
+html:not(.dark) .liquid-glass-card {
+  background: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(240, 245, 255, 0.6) 100%
+  );
+  border: 1px solid rgba(190, 190, 202, 0.4);
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.05),
+    inset 0 1px 2px #ffffff;
 }
 
-.animate-liquid {
-  animation: fluid-float 12s ease-in-out infinite alternate;
+html:not(.dark) .liquid-glass-card:hover {
+  background: #ffffff;
+  border-color: #3c3c44;
+  box-shadow: 
+    0 20px 35px -8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px #ffffff;
+  transform: translateY(-5px);
 }
 
-/* Samarkan teks biasa agar tampil seperti titik-titik password */
 .password-mask {
   -webkit-text-security: disc !important;
 }

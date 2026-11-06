@@ -1,27 +1,42 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { divisionsData as initialDivisionsData } from '../data/divisionsData';
-import type { DivisionDetail, Member, DivisionProker } from '../types';
+import type { 
+  DivisionDetail, Member, DivisionProker, 
+  Announcement, Competition, BlogPost, SiteSettings 
+} from '../types';
 
 interface DataContextType {
   divisions: DivisionDetail[];
+  announcements: Announcement[];
+  competitions: Competition[];
+  blogs: BlogPost[];
+  settings: SiteSettings;
   isLoading: boolean;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
   isAdmin: boolean;
   adminUsername: string;
   login: (user: string, pass: string) => Promise<boolean>;
   logout: () => void;
   changeCredentials: (newUsername: string, newPassword: string) => Promise<void>;
-  updateLeader: (divisionSlug: string, leader: Member) => Promise<void>;
-  updateCoLeader: (divisionSlug: string, coLeader?: Member) => Promise<void>;
-  addMember: (divisionSlug: string, member: Member) => Promise<void>;
-  updateMember: (divisionSlug: string, index: number, member: Member) => Promise<void>;
-  deleteMember: (divisionSlug: string, index: number) => Promise<void>;
-  addProgram: (divisionSlug: string, program: DivisionProker) => Promise<void>;
-  updateProgram: (divisionSlug: string, index: number, program: DivisionProker) => Promise<void>;
-  deleteProgram: (divisionSlug: string, index: number) => Promise<void>;
+  updateSettings: (newSettings: Partial<SiteSettings>) => Promise<void>;
+  updateLeader: (slug: string, leader: Member) => Promise<void>;
+  updateCoLeader: (slug: string, coLeader?: Member) => Promise<void>;
+  addMember: (slug: string, member: Member) => Promise<void>;
+  updateMember: (slug: string, index: number, member: Member) => Promise<void>;
+  deleteMember: (slug: string, index: number) => Promise<void>;
+  addProgram: (slug: string, program: DivisionProker) => Promise<void>;
+  updateProgram: (slug: string, index: number, program: DivisionProker) => Promise<void>;
+  deleteProgram: (slug: string, index: number) => Promise<void>;
+  saveAnnouncement: (data: Partial<Announcement>) => Promise<void>;
+  deleteAnnouncement: (id: string) => Promise<void>;
+  saveCompetition: (data: Partial<Competition>) => Promise<void>;
+  deleteCompetition: (id: string) => Promise<void>;
+  saveBlog: (data: Partial<BlogPost>) => Promise<void>;
+  deleteBlog: (id: string) => Promise<void>;
 }
 
-// URUTAN DIVISI BAKU DAN RESMI
 const STRICT_DIVISION_ORDER = [
   'kahim-wakahim',
   'sekretaris',
@@ -33,92 +48,125 @@ const STRICT_DIVISION_ORDER = [
   'humas',
 ];
 
-// FUNGSI PENATAAN ULANG MUTLAK (ANTI-ACAK)
 const enforceDivisionOrder = (list: DivisionDetail[]): DivisionDetail[] => {
   const orderedList: DivisionDetail[] = [];
-
-  // 1. Susun persis sesuai urutan STRICT_DIVISION_ORDER
   STRICT_DIVISION_ORDER.forEach((slug) => {
     const found = list.find((item) => item.slug?.trim().toLowerCase() === slug);
-    if (found) {
-      orderedList.push(found);
-    }
+    if (found) orderedList.push(found);
   });
-
-  // 2. Bila ada divisi baru di luar 8 daftar ini, masukkan di paling belakang
   list.forEach((item) => {
-    const itemSlug = item.slug?.trim().toLowerCase();
-    if (!STRICT_DIVISION_ORDER.includes(itemSlug)) {
+    if (!STRICT_DIVISION_ORDER.includes(item.slug?.trim().toLowerCase())) {
       orderedList.push(item);
     }
   });
-
   return orderedList;
 };
 
+const DEFAULT_SETTINGS: SiteSettings = {
+  org_name: 'Himpunan Mahasiswa Informatika',
+  univ_name: 'Universitas Internasional Semen Indonesia',
+  cabinet_name: 'KABINET SAMVAYA',
+  period: '2026/2027',
+  hero_title: 'Ruang Akselerasi, Inovasi & Karya Nyata Informatika',
+  hero_subtitle: 'Wadah kolaborasi dan pengembangan potensi mahasiswa Informatika UISI berdaya saing global.',
+  vision: 'Menjadikan HMIF UISI sebagai wadah akselerasi potensi mahasiswa informatika yang unggul, berintegritas, inklusif, dan adaptif terhadap perkembangan teknologi global.',
+  mission: [
+    'Membangun iklim riset, inovasi software, dan kompetisi teknologi yang berdaya saing tinggi.',
+    'Menyelenggarakan pembinaan karakter, etika, dan kepemimpinan yang berkelanjutan.',
+    'Memperluas jejaring strategis dengan alumni, civitas akademika, dan dunia industri IT nasional.'
+  ],
+  logo_url: '',
+  primary_color_dark: '#3c3c44',
+  secondary_color_dark: '#bebeca',
+  primary_color_light: '#3c3c44',
+  secondary_color_light: '#bebeca',
+};
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
-const AUTH_SESSION_KEY = 'hmif_admin_session';
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [divisions, setDivisions] = useState<DivisionDetail[]>(() => enforceDivisionOrder(initialDivisionsData));
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    return localStorage.getItem(AUTH_SESSION_KEY) === 'true';
-  });
-  const [adminUsername, setAdminUsername] = useState<string>('admin');
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => localStorage.getItem('hmif_theme') !== 'light');
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('hmif_admin_session') === 'true');
+  const [adminUsername, setAdminUsername] = useState('admin');
 
-  // Ambil data langsung dari Supabase dengan sorting order_index
-  const fetchDivisions = async () => {
+  const applyThemeColors = useCallback((dark: boolean, currentSettings: SiteSettings) => {
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add('dark');
+      root.style.setProperty('--theme-primary', currentSettings.primary_color_dark);
+      root.style.setProperty('--theme-secondary', currentSettings.secondary_color_dark);
+    } else {
+      root.classList.remove('dark');
+      root.style.setProperty('--theme-primary', currentSettings.primary_color_light);
+      root.style.setProperty('--theme-secondary', currentSettings.secondary_color_light);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('hmif_theme', next ? 'dark' : 'light');
+      applyThemeColors(next, settings);
+      return next;
+    });
+  };
+
+  const fetchAllData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('divisions')
-        .select('*')
-        .order('order_index', { ascending: true }); // <-- Diurutkan dari database
+      const { data: setRes } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+      if (setRes) {
+        setSettings(setRes);
+        applyThemeColors(isDarkMode, setRes);
+      }
 
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const formatted: DivisionDetail[] = data.map((row) => ({
-          slug: row.slug,
-          name: row.name,
-          shortName: row.short_name,
-          about: row.about,
-          leader: row.leader,
-          coLeader: row.co_leader,
-          members: row.members || [],
-          programs: row.programs || [],
+      const { data: divRes } = await supabase.from('divisions').select('*').order('order_index', { ascending: true });
+      if (divRes && divRes.length > 0) {
+        const formatted = divRes.map((r) => ({
+          slug: r.slug,
+          name: r.name,
+          shortName: r.short_name,
+          about: r.about,
+          leader: r.leader,
+          coLeader: r.co_leader,
+          members: r.members || [],
+          programs: r.programs || [],
         }));
-
-        // KUNCI URUTAN SEKALI LAGI DI LEVEL FRONTEND
         setDivisions(enforceDivisionOrder(formatted));
       }
+
+      const { data: annRes } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+      if (annRes) setAnnouncements(annRes);
+
+      const { data: compRes } = await supabase.from('competitions').select('*').order('deadline', { ascending: true });
+      if (compRes) setCompetitions(compRes);
+
+      const { data: blogRes } = await supabase.from('blogs').select('*').order('created_at', { ascending: false });
+      if (blogRes) setBlogs(blogRes);
     } catch (err) {
-      console.error('Gagal mengambil data dari Supabase:', err);
+      console.error('Error fetching Supabase data:', err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [applyThemeColors, isDarkMode]);
 
   useEffect(() => {
-    fetchDivisions();
-  }, []);
+    fetchAllData();
+  }, [fetchAllData]);
 
-  // Login via Database Cloud
   const login = async (user: string, pass: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase
-        .from('admin_creds')
-        .select('username, password')
-        .eq('id', 1)
-        .single();
-
-      if (error || !data) return false;
-
-      if (data.username === user.trim() && data.password === pass) {
+      const { data } = await supabase.from('admin_creds').select('username, password').eq('id', 1).single();
+      if (data && data.username === user.trim() && data.password === pass) {
         setIsAdmin(true);
         setAdminUsername(data.username);
-        localStorage.setItem(AUTH_SESSION_KEY, 'true');
+        localStorage.setItem('hmif_admin_session', 'true');
         return true;
       }
       return false;
@@ -129,143 +177,166 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setIsAdmin(false);
-    localStorage.removeItem(AUTH_SESSION_KEY);
+    localStorage.removeItem('hmif_admin_session');
   };
 
-  // Ganti Password & Username Admin
   const changeCredentials = async (newUsername: string, newPassword: string) => {
-    await supabase
-      .from('admin_creds')
-      .update({ username: newUsername.trim(), password: newPassword })
-      .eq('id', 1);
+    await supabase.from('admin_creds').update({ username: newUsername.trim(), password: newPassword }).eq('id', 1);
     setAdminUsername(newUsername.trim());
   };
 
-  // Helper sinkronisasi divisi ke Supabase
-  const syncDivisionToSupabase = async (updatedDiv: DivisionDetail) => {
-    await supabase
-      .from('divisions')
-      .update({
-        leader: updatedDiv.leader,
-        co_leader: updatedDiv.coLeader,
-        members: updatedDiv.members,
-        programs: updatedDiv.programs,
-      })
-      .eq('slug', updatedDiv.slug);
+  const updateSettings = async (newSettings: Partial<SiteSettings>) => {
+    const merged = { ...settings, ...newSettings };
+    setSettings(merged);
+    applyThemeColors(isDarkMode, merged);
+    await supabase.from('site_settings').update(newSettings).eq('id', 1);
   };
 
-  // CRUD Mahasiswa & Pimpinan
+  const syncDivisionToSupabase = async (updated: DivisionDetail) => {
+    await supabase.from('divisions').update({
+      leader: updated.leader,
+      co_leader: updated.coLeader,
+      members: updated.members,
+      programs: updated.programs,
+    }).eq('slug', updated.slug);
+  };
+
+  // CRUD Mahasiswa & Pimpinan (Fix Local State & Supabase Update)
   const updateLeader = async (slug: string, leader: Member) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) => (d.slug === slug ? { ...d, leader } : d));
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const updated = { ...target, leader };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
   const updateCoLeader = async (slug: string, coLeader?: Member) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) => (d.slug === slug ? { ...d, coLeader } : d));
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const updated = { ...target, coLeader };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
   const addMember = async (slug: string, member: Member) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) =>
-        d.slug === slug ? { ...d, members: [...d.members, member] } : d
-      );
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const updated = { ...target, members: [...target.members, member] };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
   const updateMember = async (slug: string, index: number, member: Member) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) => {
-        if (d.slug === slug) {
-          const newMembers = [...d.members];
-          newMembers[index] = member;
-          return { ...d, members: newMembers };
-        }
-        return d;
-      });
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const newMembers = [...target.members];
+    newMembers[index] = member;
+    const updated = { ...target, members: newMembers };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
+  // FIX DELETE MEMBER AGAR BERFUNGSI SEMPURNA DI LOCAL (NPM RUN DEV)
   const deleteMember = async (slug: string, index: number) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) => {
-        if (d.slug === slug) {
-          return { ...d, members: d.members.filter((_, i) => i !== index) };
-        }
-        return d;
-      });
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const newMembers = target.members.filter((_, i) => i !== index);
+    const updated = { ...target, members: newMembers };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
   // CRUD Program Kerja
   const addProgram = async (slug: string, program: DivisionProker) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) =>
-        d.slug === slug ? { ...d, programs: [...d.programs, program] } : d
-      );
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const updated = { ...target, programs: [...target.programs, program] };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
   const updateProgram = async (slug: string, index: number, program: DivisionProker) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) => {
-        if (d.slug === slug) {
-          const newProgs = [...d.programs];
-          newProgs[index] = program;
-          return { ...d, programs: newProgs };
-        }
-        return d;
-      });
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const newPrograms = [...target.programs];
+    newPrograms[index] = program;
+    const updated = { ...target, programs: newPrograms };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
   };
 
+  // FIX DELETE PROKER AGAR BERFUNGSI SEMPURNA DI LOCAL (NPM RUN DEV)
   const deleteProgram = async (slug: string, index: number) => {
-    setDivisions((prev) => {
-      const updated = prev.map((d) => {
-        if (d.slug === slug) {
-          return { ...d, programs: d.programs.filter((_, i) => i !== index) };
-        }
-        return d;
-      });
-      const target = updated.find((d) => d.slug === slug);
-      if (target) syncDivisionToSupabase(target);
-      return enforceDivisionOrder(updated);
-    });
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const newPrograms = target.programs.filter((_, i) => i !== index);
+    const updated = { ...target, programs: newPrograms };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await syncDivisionToSupabase(updated);
+  };
+
+  const saveAnnouncement = async (item: Partial<Announcement>) => {
+    if (item.id) {
+      await supabase.from('announcements').update(item).eq('id', item.id);
+    } else {
+      await supabase.from('announcements').insert([item]);
+    }
+    const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
+    if (data) setAnnouncements(data);
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    await supabase.from('announcements').delete().eq('id', id);
+    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const saveCompetition = async (item: Partial<Competition>) => {
+    if (item.id) {
+      await supabase.from('competitions').update(item).eq('id', item.id);
+    } else {
+      await supabase.from('competitions').insert([item]);
+    }
+    const { data } = await supabase.from('competitions').select('*').order('deadline', { ascending: true });
+    if (data) setCompetitions(data);
+  };
+
+  const deleteCompetition = async (id: string) => {
+    await supabase.from('competitions').delete().eq('id', id);
+    setCompetitions((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const saveBlog = async (item: Partial<BlogPost>) => {
+    if (item.id) {
+      await supabase.from('blogs').update(item).eq('id', item.id);
+    } else {
+      await supabase.from('blogs').insert([item]);
+    }
+    const { data } = await supabase.from('blogs').select('*').order('created_at', { ascending: false });
+    if (data) setBlogs(data);
+  };
+
+  const deleteBlog = async (id: string) => {
+    await supabase.from('blogs').delete().eq('id', id);
+    setBlogs((prev) => prev.filter((b) => b.id !== id));
   };
 
   return (
     <DataContext.Provider
       value={{
         divisions,
+        announcements,
+        competitions,
+        blogs,
+        settings,
         isLoading,
+        isDarkMode,
+        toggleTheme,
         isAdmin,
         adminUsername,
         login,
         logout,
         changeCredentials,
+        updateSettings,
         updateLeader,
         updateCoLeader,
         addMember,
@@ -274,6 +345,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addProgram,
         updateProgram,
         deleteProgram,
+        saveAnnouncement,
+        deleteAnnouncement,
+        saveCompetition,
+        deleteCompetition,
+        saveBlog,
+        deleteBlog,
       }}
     >
       {children}
@@ -283,8 +360,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useData = () => {
   const context = useContext(DataContext);
-  if (!context) {
-    throw new Error('useData must be used within DataProvider');
-  }
+  if (!context) throw new Error('useData must be used within DataProvider');
   return context;
 };

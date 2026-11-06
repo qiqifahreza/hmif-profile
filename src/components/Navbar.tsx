@@ -1,138 +1,97 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Terminal, ChevronDown, Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import logoImg from '../assets/logo.png'; // Cara import asset resmi Vite
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { divisions } = useData(); // Pakai data dari context
-  const [logoError, setLogoError] = useState(false);
+  const { settings, isDarkMode, toggleTheme } = useData();
+  const location = useLocation();
+
+  const navLinks = [
+    { name: 'Beranda', href: '/' },
+    { name: 'Tentang HMIF', href: '/tentang' },
+    { name: 'Program Kerja', href: '/proker' },
+    { name: 'Dokumentasi', href: '/dokumentasi' },
+    { name: 'Pengumuman', href: '/pengumuman' },
+    { name: 'Kompetisi', href: '/kompetisi' },
+    { name: 'Blog', href: '/blog' },
+  ];
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-dark/90 backdrop-blur-md z-50 border-b border-primary text-secondary">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 left-0 w-full z-50 glass-effect border-b transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo Brand */}
-          <Link to="/" className="flex items-center space-x-3 text-white hover:text-secondary transition-colors group">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-primary/70 border border-secondary/30 flex items-center justify-center p-1 group-hover:border-secondary transition-all shadow-md">
-              {!logoError ? (
-                <img
-                  src={logoImg}
-                  alt="Logo HMIF UISI"
-                  referrerPolicy="no-referrer"
-                  onError={() => setLogoError(true)}
-                  className="w-full h-full rounded-full object-contain"
-                />
+          {/* Logo & Nama Organisasi */}
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-primary/20 border flex items-center justify-center p-0.5 shadow-sm">
+              {settings.logo_url ? (
+                <img src={settings.logo_url} alt="Logo" className="w-full h-full object-contain rounded-full" />
               ) : (
-                <Terminal size={18} className="text-secondary" />
+                <div className="font-bold text-xs text-primary">IF</div>
               )}
             </div>
-            <span className="font-bold text-lg tracking-wider text-white">HMIF UISI</span>
+            <div className="flex flex-col">
+              <span className="font-extrabold text-sm tracking-wide">HMIF UISI</span>
+              <span className="text-[10px] opacity-70 font-mono tracking-tighter">{settings.cabinet_name}</span>
+            </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-secondary hover:text-white text-sm font-medium transition-colors">
-              Beranda
-            </Link>
-
-            {/* Dropdown Divisi */}
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                onMouseEnter={() => setIsDropdownOpen(true)}
-                className="flex items-center gap-1 text-secondary hover:text-white text-sm font-medium py-2 transition-colors focus:outline-none"
+          {/* Navigasi Desktop 7 Menu */}
+          <div className="hidden lg:flex items-center space-x-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  isActive(link.href)
+                    ? 'bg-primary text-white font-semibold shadow-sm'
+                    : 'hover:bg-primary/10 opacity-80 hover:opacity-100'
+                }`}
               >
-                <span>Divisi</span>
-                <ChevronDown size={15} />
-              </button>
+                {link.name}
+              </Link>
+            ))}
 
-              {isDropdownOpen && (
-                <div
-                  onMouseEnter={() => setIsDropdownOpen(true)}
-                  onMouseLeave={() => setIsDropdownOpen(false)}
-                  className="absolute left-0 mt-0 w-64 bg-surface border border-primary rounded-xl shadow-2xl py-2 z-50"
-                >
-                  {/* Menggunakan data dinamis divisions */}
-                  {divisions.map((div) => (
-                    <Link
-                      key={div.slug}
-                      to={`/divisi/${div.slug}`}
-                      onClick={() => setIsDropdownOpen(false)}
-                      className="block px-4 py-2.5 text-sm text-secondary hover:bg-primary hover:text-white transition-colors"
-                    >
-                      {div.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <a href="/#tentang" className="text-secondary hover:text-white text-sm font-medium transition-colors">
-              Tentang
-            </a>
-            <a href="/#proker" className="text-secondary hover:text-white text-sm font-medium transition-colors">
-              Program Kerja
-            </a>
-            <a href="#kontak" className="text-secondary hover:text-white text-sm font-medium transition-colors">
-              Kontak
-            </a>
+            {/* Tombol Light / Dark Mode */}
+            <button
+              onClick={toggleTheme}
+              className="ml-3 p-2 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+              aria-label="Toggle Theme"
+            >
+              {isDarkMode ? <Sun size={16} className="text-amber-300" /> : <Moon size={16} className="text-slate-700" />}
+            </button>
           </div>
 
-          {/* Hamburger Mobile */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-secondary hover:text-white p-2"
-              aria-label="Toggle Menu"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {/* Tombol Mobile */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button onClick={toggleTheme} className="p-2 rounded-xl bg-primary/10">
+              {isDarkMode ? <Sun size={16} className="text-amber-300" /> : <Moon size={16} className="text-slate-700" />}
+            </button>
+            <button onClick={() => setIsOpen(!isOpen)} className="p-2 opacity-80 hover:opacity-100">
+              {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menu Mobile */}
+      {/* Mobile Drawer */}
       {isOpen && (
-        <div className="md:hidden bg-surface border-b border-primary px-4 pt-2 pb-4 space-y-2 max-h-[80vh] overflow-y-auto">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="block py-2 text-secondary hover:text-white font-medium"
-          >
-            Beranda
-          </Link>
-          <div className="py-2 border-t border-primary text-xs font-semibold text-secondary/60 uppercase tracking-wider">
-            Divisi Kabinet Samvaya
-          </div>
-          {/* Menggunakan data dinamis divisions */}
-          {divisions.map((div) => (
+        <div className="lg:hidden glass-effect border-b px-4 pt-2 pb-5 space-y-1">
+          {navLinks.map((link) => (
             <Link
-              key={div.slug}
-              to={`/divisi/${div.slug}`}
+              key={link.name}
+              to={link.href}
               onClick={() => setIsOpen(false)}
-              className="block pl-3 py-1.5 text-sm text-secondary hover:text-white"
+              className={`block px-3 py-2 rounded-lg text-sm font-medium ${
+                isActive(link.href) ? 'bg-primary text-white font-semibold' : 'opacity-80 hover:bg-primary/10'
+              }`}
             >
-              {div.name}
+              {link.name}
             </Link>
           ))}
-          <a
-            href="/#tentang"
-            onClick={() => setIsOpen(false)}
-            className="block py-2 text-secondary hover:text-white font-medium border-t border-primary"
-          >
-            Tentang
-          </a>
-          {/* Link Dosen sudah dibersihkan */}
-          <a
-            href="#kontak"
-            onClick={() => setIsOpen(false)}
-            className="block py-2 text-secondary hover:text-white font-medium"
-          >
-            Kontak
-          </a>
         </div>
       )}
     </nav>
