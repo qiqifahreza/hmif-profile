@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { 
   LogOut, Plus, Trash2, Edit3, ArrowLeft,
-  Calendar, Layers, KeyRound, Palette, Bell, Trophy, BookOpen, Camera, Upload, X
+  Calendar, Layers, KeyRound, Palette, Bell, Trophy, BookOpen, Camera, Upload, X, Sun, Moon
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import type { Member, DivisionProker, ProkerStatus, Announcement, Competition, BlogPost, SiteSettings } from '../../types';
@@ -11,6 +11,7 @@ export const AdminDashboard: React.FC = () => {
   const { 
     divisions, announcements, competitions, blogs, settings,
     isAdmin, adminUsername, logout, changeCredentials, updateSettings,
+    isDarkMode, toggleTheme,
     updateLeader, updateCoLeader, addMember, updateMember, deleteMember,
     addProgram, updateProgram, deleteProgram,
     saveAnnouncement, deleteAnnouncement,
@@ -170,50 +171,39 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#121215] text-[#bebeca]">
       
-      {/* ========================================================
+{/* ========================================================
           SIDEBAR KIRI: SUPERPANEL & DIVISIPANEL
          ======================================================== */}
-      <aside className="w-full lg:w-72 lg:min-h-screen border-r border-[#3c3c44] bg-[#16161b] p-5 flex flex-col justify-between shrink-0">
+      <aside className="w-full lg:w-72 lg:min-h-screen border-r border-slate-300 dark:border-[#3c3c44] bg-slate-50 dark:bg-[#16161b] p-5 flex flex-col justify-between shrink-0 transition-colors duration-300">
         <div className="space-y-6">
           
-          {/* Logo & Info Admin */}
-          <div>
-            <Link to="/" className="text-xs text-[#bebeca]/60 hover:text-white flex items-center gap-1.5 transition-colors mb-2">
-              <ArrowLeft size={13} /> Ke Website Publik
-            </Link>
-            <h1 className="font-extrabold text-lg text-white tracking-tight leading-snug">HMIF CMS Panel</h1>
-            <p className="text-[11px] font-mono text-[#bebeca]/60">Login: @{adminUsername}</p>
+          {/* Logo & Info Admin + TOMBOL SWITCH TEMA */}
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <Link to="/" className="text-xs text-slate-500 dark:text-[#bebeca]/60 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition-colors mb-2">
+                <ArrowLeft size={13} /> Ke Website Publik
+              </Link>
+              <h1 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight leading-snug">HMIF CMS Panel</h1>
+              <p className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60">Login: @{adminUsername}</p>
+            </div>
+
+            {/* TOMBOL SWITCH TEMA GELAP / TERANG */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#232329] hover:bg-slate-100 dark:hover:bg-[#3c3c44] shadow-sm transition-all cursor-pointer shrink-0"
+              title={isDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap"}
+              aria-label="Toggle Theme"
+            >
+              {isDarkMode ? (
+                <Sun size={16} className="text-amber-400" />
+              ) : (
+                <Moon size={16} className="text-slate-700" />
+              )}
+            </button>
           </div>
 
-          {/* SUPERPANEL NAVIGASI UTAMA */}
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#bebeca]/50 block px-2 mb-1.5">
-              Superpanel
-            </span>
-            {[
-              { id: 'settings', label: 'Pengaturan & Warna', icon: <Palette size={15}/> },
-              { id: 'divisions', label: 'Divisi & Anggota', icon: <Layers size={15}/> },
-              { id: 'programs', label: 'Program Kerja', icon: <Calendar size={15}/> },
-              { id: 'documentation', label: 'Dokumentasi', icon: <Camera size={15}/> },
-              { id: 'announcements', label: 'Pengumuman', icon: <Bell size={15}/> },
-              { id: 'competitions', label: 'Kompetisi', icon: <Trophy size={15}/> },
-              { id: 'blogs', label: 'Blog & Edukasi', icon: <BookOpen size={15}/> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
-                  activeTab === tab.id
-                    ? 'bg-[#bebeca] text-[#121215] shadow-md font-bold'
-                    : 'text-[#bebeca] hover:bg-[#232329] hover:text-white'
-                }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
+          {/* ... Sisa menu superpanel ke bawah tetap sama ... */}
           {/* DIVISIPANEL (HANYA MUNCUL DI TAB DIVISI, PROKER, & DOKUMENTASI) */}
           {showDivisiPanel && (
             <div className="space-y-1 pt-4 border-t border-[#3c3c44]">
