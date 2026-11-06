@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ⚠️ BARIS INI WAJIB: Memaksa Tailwind v4 mengikuti tombol toggle class .dark */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../index.html";
 @source "../src/**/*.{js,ts,jsx,tsx}";
 
@@ -12,27 +15,24 @@
 }
 
 /* ========================================================
-   LIGHT MODE: Primary & Secondary Dibalik
-   (Primary #3c3c44 jadi teks tegas, Secondary #bebeca jadi aksen)
+   LIGHT MODE: Teks Gelap Pekat (#0f172a), Kaca Kristal Terang
    ======================================================== */
 :root {
-  --theme-bg: #f8f9fb;
+  --theme-bg: #f8fafc;
   --theme-surface: rgba(255, 255, 255, 0.85);
-  --theme-border: rgba(190, 190, 202, 0.45);
-  --theme-text: #232329;
-  --theme-heading: #121215;
-  --theme-spotlight: rgba(60, 60, 68, 0.08);
+  --theme-border: rgba(203, 213, 225, 0.8);
+  --theme-text: #0f172a;
+  --theme-spotlight: rgba(15, 23, 42, 0.06);
 }
 
 /* ========================================================
-   DARK MODE: Teks Judul Selalu Terang (Putih / Silver #bebeca)
+   DARK MODE: Teks Putih & Silver (#bebeca), Kaca Gelap
    ======================================================== */
 .dark {
   --theme-bg: #101014;
   --theme-surface: rgba(30, 30, 36, 0.6);
   --theme-border: rgba(190, 190, 202, 0.18);
   --theme-text: #bebeca;
-  --theme-heading: #ffffff;
   --theme-spotlight: rgba(190, 190, 202, 0.22);
 }
 
@@ -40,11 +40,11 @@ body {
   background-color: var(--theme-bg);
   color: var(--theme-text);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: background-color 0.4s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
 
-/* Efek Kaca Cair (Liquid Glass) */
+/* Efek Kaca Cair Adaptif */
 .liquid-glass, .glass-effect {
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
@@ -52,30 +52,18 @@ body {
 }
 
 .dark .liquid-glass, .dark .glass-effect {
-  background: linear-gradient(
-    135deg,
-    rgba(60, 60, 68, 0.45) 0%,
-    rgba(25, 25, 30, 0.35) 100%
-  );
+  background: linear-gradient(135deg, rgba(60, 60, 68, 0.45) 0%, rgba(25, 25, 30, 0.35) 100%);
   border: 1px solid rgba(190, 190, 202, 0.16);
-  box-shadow: 
-    0 10px 32px 0 rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px 0 rgba(190, 190, 202, 0.25);
+  box-shadow: 0 10px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(190, 190, 202, 0.25);
 }
 
 html:not(.dark) .liquid-glass, html:not(.dark) .glass-effect {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(240, 243, 250, 0.6) 100%
-  );
-  border: 1px solid rgba(190, 190, 202, 0.5);
-  box-shadow: 
-    0 8px 30px rgba(0, 0, 0, 0.05),
-    inset 0 1px 2px #ffffff;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.7) 100%);
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05), inset 0 1px 2px #ffffff;
 }
 
-/* Kartu Kaca Cair Interaktif */
+/* Kartu Kaca Cair */
 .liquid-glass-card {
   backdrop-filter: blur(16px) saturate(190%);
   -webkit-backdrop-filter: blur(16px) saturate(190%);
@@ -83,49 +71,28 @@ html:not(.dark) .liquid-glass, html:not(.dark) .glass-effect {
 }
 
 .dark .liquid-glass-card {
-  background: linear-gradient(
-    140deg,
-    rgba(60, 60, 68, 0.35) 0%,
-    rgba(25, 25, 30, 0.45) 100%
-  );
+  background: linear-gradient(140deg, rgba(60, 60, 68, 0.35) 0%, rgba(25, 25, 30, 0.45) 100%);
   border: 1px solid rgba(190, 190, 202, 0.15);
-  box-shadow: 
-    0 12px 30px -5px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(190, 190, 202, 0.2);
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(190, 190, 202, 0.2);
 }
 
 .dark .liquid-glass-card:hover {
-  background: linear-gradient(
-    140deg,
-    rgba(60, 60, 68, 0.55) 0%,
-    rgba(35, 35, 42, 0.6) 100%
-  );
+  background: linear-gradient(140deg, rgba(60, 60, 68, 0.55) 0%, rgba(35, 35, 42, 0.6) 100%);
   border-color: rgba(190, 190, 202, 0.5);
-  box-shadow: 
-    0 22px 45px -10px rgba(0, 0, 0, 0.65),
-    0 0 25px -5px rgba(190, 190, 202, 0.2),
-    inset 0 1px 2px rgba(190, 190, 202, 0.5);
+  box-shadow: 0 22px 45px -10px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(190, 190, 202, 0.5);
   transform: translateY(-5px);
 }
 
 html:not(.dark) .liquid-glass-card {
-  background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(240, 245, 255, 0.6) 100%
-  );
-  border: 1px solid rgba(190, 190, 202, 0.4);
-  box-shadow: 
-    0 10px 25px -5px rgba(0, 0, 0, 0.05),
-    inset 0 1px 2px #ffffff;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.88) 0%, rgba(248, 250, 252, 0.75) 100%);
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.06), inset 0 1px 2px #ffffff;
 }
 
 html:not(.dark) .liquid-glass-card:hover {
   background: #ffffff;
-  border-color: #3c3c44;
-  box-shadow: 
-    0 20px 35px -8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 2px #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.12), inset 0 1px 2px #ffffff;
   transform: translateY(-5px);
 }
 
