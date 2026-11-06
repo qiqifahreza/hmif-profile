@@ -169,11 +169,10 @@ export const AdminDashboard: React.FC = () => {
   const showDivisiPanel = activeTab === 'divisions' || activeTab === 'programs' || activeTab === 'documentation';
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#121215] text-[#bebeca]">
-{/* ========================================================
+<div className="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#121215] text-slate-800 dark:text-[#bebeca] transition-colors duration-300">{/* ========================================================
           SIDEBAR KIRI: SUPERPANEL & DIVISIPANEL LENGKAP
          ======================================================== */}
-      <aside className="w-full lg:w-72 lg:min-h-screen border-r border-slate-300 dark:border-[#3c3c44] bg-slate-50 dark:bg-[#16161b] p-5 flex flex-col justify-between shrink-0 transition-colors duration-300">
+      <aside className="w-full lg:w-72 lg:min-h-screen border-r border-slate-200 dark:border-[#3c3c44] bg-white dark:bg-[#16161b] p-5 flex flex-col justify-between shrink-0 transition-colors duration-300">
         <div className="space-y-6">
           
           {/* Logo & Info Admin + TOMBOL SWITCH TEMA */}
@@ -277,87 +276,85 @@ export const AdminDashboard: React.FC = () => {
       {/* ========================================================
           KONTEN UTAMA KANAN
          ======================================================== */}
-      <main className="flex-1 p-6 lg:p-10 max-h-screen overflow-y-auto">
-        <div className="max-w-5xl mx-auto space-y-8">
+      <main className="flex-1 p-6 lg:p-10 max-h-screen overflow-y-auto bg-slate-100/70 dark:bg-transparent">
+        <div className="max-w-5xl mx-auto space-y-8">{/* TAB 1: PENGATURAN TEKS, WARNA, LOGO, DAN MISI */}
 {/* TAB 1: PENGATURAN TEKS, WARNA, LOGO, DAN MISI */}
           {activeTab === 'settings' && (
-            <div className="liquid-glass rounded-3xl p-6 lg:p-8 border border-slate-300 dark:border-[#3c3c44] space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kustomisasi Tampilan &amp; Konten Website</h2>
-              </div>
+            <div className="liquid-glass rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-[#3c3c44] shadow-sm dark:shadow-2xl space-y-6">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kustomisasi Tampilan &amp; Konten Website</h2>
               
               <form onSubmit={async (e) => { e.preventDefault(); await updateSettings(siteForm); alert('Pengaturan tersimpan ke Supabase!'); }} className="space-y-6">
                 
-                {/* 1. Pengaturan Palet Warna */}
-                <div className="space-y-3 p-5 rounded-2xl border border-slate-300 dark:border-[#3c3c44] bg-slate-100/70 dark:bg-[#16161b]">
+                {/* 1. Palet Warna */}
+                <div className="space-y-3 p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b]">
                   <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 dark:text-white">Palet Warna Tema</h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Primary (Dark Mode)</label>
-                      <input type="color" value={siteForm.primary_color_dark} onChange={(e) => setSiteForm({...siteForm, primary_color_dark: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-300 dark:border-[#3c3c44]" />
+                      <label className="block text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">Primary (Dark Mode)</label>
+                      <input type="color" value={siteForm.primary_color_dark} onChange={(e) => setSiteForm({...siteForm, primary_color_dark: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-200 dark:border-[#3c3c44]" />
                     </div>
                     <div>
-                      <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Secondary (Dark Mode)</label>
-                      <input type="color" value={siteForm.secondary_color_dark} onChange={(e) => setSiteForm({...siteForm, secondary_color_dark: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-300 dark:border-[#3c3c44]" />
+                      <label className="block text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">Secondary (Dark Mode)</label>
+                      <input type="color" value={siteForm.secondary_color_dark} onChange={(e) => setSiteForm({...siteForm, secondary_color_dark: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-200 dark:border-[#3c3c44]" />
                     </div>
                     <div>
-                      <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Primary (Light Mode)</label>
-                      <input type="color" value={siteForm.primary_color_light} onChange={(e) => setSiteForm({...siteForm, primary_color_light: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-300 dark:border-[#3c3c44]" />
+                      <label className="block text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">Primary (Light Mode)</label>
+                      <input type="color" value={siteForm.primary_color_light} onChange={(e) => setSiteForm({...siteForm, primary_color_light: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-200 dark:border-[#3c3c44]" />
                     </div>
                     <div>
-                      <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Secondary (Light Mode)</label>
-                      <input type="color" value={siteForm.secondary_color_light} onChange={(e) => setSiteForm({...siteForm, secondary_color_light: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-300 dark:border-[#3c3c44]" />
+                      <label className="block text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">Secondary (Light Mode)</label>
+                      <input type="color" value={siteForm.secondary_color_light} onChange={(e) => setSiteForm({...siteForm, secondary_color_light: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-200 dark:border-[#3c3c44]" />
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Upload Logo (File Lokal & URL) */}
-                <div className="p-5 rounded-2xl border border-slate-300 dark:border-[#3c3c44] bg-slate-100/70 dark:bg-[#16161b] space-y-3">
+                {/* 2. Upload Logo */}
+                <div className="p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b] space-y-3">
                   <label className="block text-xs font-mono font-bold text-slate-800 dark:text-white">Logo Organisasi (Upload File atau URL)</label>
                   <div className="flex items-center gap-4">
                     {siteForm.logo_url && (
-                      <div className="relative w-14 h-14 rounded-full overflow-hidden border border-slate-300 dark:border-[#bebeca] bg-black p-1 shrink-0">
+                      <div className="relative w-14 h-14 rounded-full overflow-hidden border border-slate-300 dark:border-[#bebeca] bg-slate-100 dark:bg-black p-1 shrink-0">
                         <img src={siteForm.logo_url} alt="Logo" className="w-full h-full object-contain" />
                         <button type="button" onClick={() => setSiteForm({...siteForm, logo_url: ''})} className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-0.5"><X size={10}/></button>
                       </div>
                     )}
-                    <label className="cursor-pointer px-4 py-2 bg-slate-200 dark:bg-[#232329] hover:bg-slate-300 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-800 dark:text-white flex items-center gap-2 transition-colors">
+                    <label className="cursor-pointer px-4 py-2 bg-slate-100 dark:bg-[#232329] hover:bg-slate-200 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-800 dark:text-white flex items-center gap-2 transition-colors">
                       <Upload size={14} /> Pilih Logo dari Perangkat
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (base64) => setSiteForm({...siteForm, logo_url: base64}))} />
                     </label>
                   </div>
-                  <input type="text" placeholder="Atau masukkan tautan URL Logo (https://...)" value={siteForm.logo_url} onChange={(e) => setSiteForm({...siteForm, logo_url: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white" />
+                  <input type="text" placeholder="Atau masukkan tautan URL Logo (https://...)" value={siteForm.logo_url} onChange={(e) => setSiteForm({...siteForm, logo_url: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-slate-400" />
                 </div>
 
                 {/* 3. Teks Identitas */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Nama Organisasi</label>
-                    <input type="text" value={siteForm.org_name} onChange={(e) => setSiteForm({...siteForm, org_name: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white" />
+                    <input type="text" value={siteForm.org_name} onChange={(e) => setSiteForm({...siteForm, org_name: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none" />
                   </div>
                   <div>
                     <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Nama Kabinet</label>
-                    <input type="text" value={siteForm.cabinet_name} onChange={(e) => setSiteForm({...siteForm, cabinet_name: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white" />
+                    <input type="text" value={siteForm.cabinet_name} onChange={(e) => setSiteForm({...siteForm, cabinet_name: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none" />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Judul Beranda (Hero Title)</label>
-                  <input type="text" value={siteForm.hero_title} onChange={(e) => setSiteForm({...siteForm, hero_title: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white" />
+                  <input type="text" value={siteForm.hero_title} onChange={(e) => setSiteForm({...siteForm, hero_title: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none" />
                 </div>
 
                 <div>
                   <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Deskripsi Beranda (Hero Subtitle)</label>
-                  <textarea rows={2} value={siteForm.hero_subtitle} onChange={(e) => setSiteForm({...siteForm, hero_subtitle: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white" />
+                  <textarea rows={2} value={siteForm.hero_subtitle} onChange={(e) => setSiteForm({...siteForm, hero_subtitle: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none" />
                 </div>
 
                 <div>
                   <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-slate-300">Visi Organisasi</label>
-                  <textarea rows={2} value={siteForm.vision} onChange={(e) => setSiteForm({...siteForm, vision: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white" />
+                  <textarea rows={2} value={siteForm.vision} onChange={(e) => setSiteForm({...siteForm, vision: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none" />
                 </div>
 
                 {/* 4. Butir-Butir Misi */}
-                <div className="p-5 rounded-2xl border border-slate-300 dark:border-[#3c3c44] bg-slate-100/70 dark:bg-[#16161b] space-y-3">
+                <div className="p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b] space-y-3">
                   <div className="flex justify-between items-center">
                     <label className="block text-xs font-mono font-bold text-slate-800 dark:text-white">Butir-Butir Misi Organisasi</label>
                     <span className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60">Total: {siteForm.mission.length}</span>
@@ -382,7 +379,7 @@ export const AdminDashboard: React.FC = () => {
                           const updated = siteForm.mission.filter((_, i) => i !== idx);
                           setSiteForm({...siteForm, mission: updated});
                         }}
-                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
+                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -405,7 +402,7 @@ export const AdminDashboard: React.FC = () => {
                           setNewMissionItem('');
                         }
                       }}
-                      className="px-3.5 py-2 bg-slate-900 dark:bg-[#bebeca] text-white dark:text-[#121215] text-xs font-bold rounded-xl"
+                      className="px-3.5 py-2 bg-slate-900 dark:bg-[#bebeca] text-white dark:text-[#121215] text-xs font-bold rounded-xl cursor-pointer"
                     >
                       Tambah Misi
                     </button>
