@@ -19,7 +19,7 @@ export interface DivisionProker {
   title: string;
   description: string;
   period: string; // Bisa tanggal atau "Coming Soon"
-  status: ProkerStatus;
+  status?: ProkerStatus; // Dibuat opsional (?) agar data lama tidak error
   documentation?: DocumentationItem;
 }
 
@@ -80,4 +80,13 @@ export interface SiteSettings {
   secondary_color_dark: string;
   primary_color_light: string;
   secondary_color_light: string;
+}
+
+// Kembalikan tipe EventProgram untuk komponen Events.tsx
+export interface EventProgram {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  tag: string;
 }

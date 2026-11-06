@@ -23,19 +23,18 @@ export const ProkerPage: React.FC = () => {
   const filtered = selectedStatus === 'Semua'
     ? allPrograms
     : allPrograms.filter((p) => p.status === selectedStatus);
-
-  const getStatusBadge = (status: ProkerStatus) => {
-    switch (status) {
-      case 'Selesai':
-        return <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><CheckCircle2 size={12}/> Selesai</span>;
-      case 'Berlangsung':
-        return <span className="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><Clock size={12}/> Berlangsung</span>;
-      case 'Akan Datang':
-        return <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><Clock size={12}/> Akan Datang</span>;
-      default:
-        return <span className="bg-slate-500/15 text-slate-300 border border-slate-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><AlertCircle size={12}/> Direncanakan</span>;
-    }
-  };
+const getStatusBadge = (status?: ProkerStatus) => {
+  switch (status) {
+    case 'Selesai':
+      return <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><CheckCircle2 size={12}/> Selesai</span>;
+    case 'Berlangsung':
+      return <span className="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><Clock size={12}/> Berlangsung</span>;
+    case 'Akan Datang':
+      return <span className="bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><Clock size={12}/> Akan Datang</span>;
+    default:
+      return <span className="bg-slate-500/15 text-slate-300 border border-slate-500/30 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1"><AlertCircle size={12}/> Direncanakan</span>;
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-10">
