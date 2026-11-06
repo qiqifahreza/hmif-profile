@@ -170,9 +170,8 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#121215] text-[#bebeca]">
-      
 {/* ========================================================
-          SIDEBAR KIRI: SUPERPANEL & DIVISIPANEL
+          SIDEBAR KIRI: SUPERPANEL & DIVISIPANEL LENGKAP
          ======================================================== */}
       <aside className="w-full lg:w-72 lg:min-h-screen border-r border-slate-300 dark:border-[#3c3c44] bg-slate-50 dark:bg-[#16161b] p-5 flex flex-col justify-between shrink-0 transition-colors duration-300">
         <div className="space-y-6">
@@ -187,7 +186,7 @@ export const AdminDashboard: React.FC = () => {
               <p className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60">Login: @{adminUsername}</p>
             </div>
 
-            {/* TOMBOL SWITCH TEMA GELAP / TERANG */}
+            {/* Tombol Switch Tema */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -203,11 +202,39 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </div>
 
-          {/* ... Sisa menu superpanel ke bawah tetap sama ... */}
+          {/* SUPERPANEL NAVIGASI UTAMA (MENGGUNAKAN SEMUA IKON DAN SETACTIVETAB) */}
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-[#bebeca]/50 block px-2 mb-1.5">
+              Superpanel
+            </span>
+            {[
+              { id: 'settings', label: 'Pengaturan & Warna', icon: <Palette size={15}/> },
+              { id: 'divisions', label: 'Divisi & Anggota', icon: <Layers size={15}/> },
+              { id: 'programs', label: 'Program Kerja', icon: <Calendar size={15}/> },
+              { id: 'documentation', label: 'Dokumentasi', icon: <Camera size={15}/> },
+              { id: 'announcements', label: 'Pengumuman', icon: <Bell size={15}/> },
+              { id: 'competitions', label: 'Kompetisi', icon: <Trophy size={15}/> },
+              { id: 'blogs', label: 'Blog & Edukasi', icon: <BookOpen size={15}/> },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                  activeTab === tab.id
+                    ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                    : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+                }`}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
           {/* DIVISIPANEL (HANYA MUNCUL DI TAB DIVISI, PROKER, & DOKUMENTASI) */}
           {showDivisiPanel && (
-            <div className="space-y-1 pt-4 border-t border-[#3c3c44]">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#bebeca]/50 block px-2 mb-1.5">
+            <div className="space-y-1 pt-4 border-t border-slate-300 dark:border-[#3c3c44]">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-[#bebeca]/50 block px-2 mb-1.5">
                 Pilih Divisi
               </span>
               <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
@@ -215,10 +242,10 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     key={d.slug}
                     onClick={() => setSelectedDivSlug(d.slug)}
-                    className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors truncate ${
+                    className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors truncate cursor-pointer ${
                       selectedDivSlug === d.slug
-                        ? 'bg-[#3c3c44] text-white font-bold border-l-2 border-[#bebeca]'
-                        : 'text-[#bebeca]/70 hover:bg-[#232329] hover:text-white'
+                        ? 'bg-slate-300 dark:bg-[#3c3c44] text-slate-900 dark:text-white font-bold border-l-2 border-slate-900 dark:border-[#bebeca]'
+                        : 'text-slate-600 dark:text-[#bebeca]/70 hover:bg-slate-200 dark:hover:bg-[#232329]'
                     }`}
                     title={d.name}
                   >
@@ -232,22 +259,21 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Footer Sidebar: Ganti Akun & Logout */}
-        <div className="pt-4 border-t border-[#3c3c44] flex items-center justify-between gap-2">
+        <div className="pt-4 border-t border-slate-300 dark:border-[#3c3c44] flex items-center justify-between gap-2">
           <button
             onClick={() => setShowAccountModal(true)}
-            className="flex-1 py-2 px-2.5 rounded-xl border border-[#3c3c44] hover:border-[#bebeca] text-[11px] font-semibold text-[#bebeca] hover:text-white flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 py-2 px-2.5 rounded-xl border border-slate-300 dark:border-[#3c3c44] hover:border-slate-500 dark:hover:border-[#bebeca] text-[11px] font-semibold text-slate-700 dark:text-[#bebeca] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <KeyRound size={13} /> Akun
           </button>
           <button
             onClick={() => { logout(); navigate('/admin/login'); }}
-            className="py-2 px-3 rounded-xl bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-300 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+            className="py-2 px-3 rounded-xl bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-600 dark:text-red-300 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
           >
             <LogOut size={13} /> Keluar
           </button>
         </div>
       </aside>
-
       {/* ========================================================
           KONTEN UTAMA KANAN
          ======================================================== */}
