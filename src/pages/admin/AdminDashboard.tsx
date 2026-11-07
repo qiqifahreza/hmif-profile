@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import type { Member, DivisionProker, ProkerStatus, Announcement, Competition, BlogPost, SiteSettings } from '../../types';
+import { SearchBar } from '../../components/SearchBar';
+import { Pagination } from '../../components/Pagination';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -174,6 +176,55 @@ export const AdminDashboard: React.FC = () => {
   };
   // Apakah DivisiPanel perlu ditampilkan di sidebar kiri?
   const showDivisiPanel = activeTab === 'divisions' || activeTab === 'programs' || activeTab === 'documentation';
+// 1. Set 5 item per halaman untuk admin
+  const [adminSearch, setAdminSearch] = useState('');
+  const [adminPage, setAdminPage] = useState(1);
+  const adminItemsPerPage = 5;
+
+  const handleSearchChange = (val: string) => {
+    setAdminSearch(val);
+    setAdminPage(1);
+  };
+
+  // 2. Program Kerja (5 item)
+  const filteredPrograms = currentDiv.programs.filter((p) =>
+    p.title.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    p.description.toLowerCase().includes(adminSearch.toLowerCase())
+  );
+  const totalProgPages = Math.ceil(filteredPrograms.length / adminItemsPerPage);
+  const paginatedPrograms = filteredPrograms.slice((adminPage - 1) * adminItemsPerPage, adminPage * adminItemsPerPage);
+
+  // 3. Dokumentasi (5 item)
+  const filteredDocs = currentDiv.programs.filter((p) =>
+    p.title.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    (p.documentation?.summary && p.documentation.summary.toLowerCase().includes(adminSearch.toLowerCase()))
+  );
+  const totalDocPages = Math.ceil(filteredDocs.length / adminItemsPerPage);
+  const paginatedDocs = filteredDocs.slice((adminPage - 1) * adminItemsPerPage, adminPage * adminItemsPerPage);
+
+  // 4. Pengumuman (5 item)
+  const filteredAnn = announcements.filter((a) =>
+    a.title.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    a.content.toLowerCase().includes(adminSearch.toLowerCase())
+  );
+  const totalAnnPages = Math.ceil(filteredAnn.length / adminItemsPerPage);
+  const paginatedAnn = filteredAnn.slice((adminPage - 1) * adminItemsPerPage, adminPage * adminItemsPerPage);
+
+  // 5. Kompetisi (5 item)
+  const filteredComp = competitions.filter((c) =>
+    c.title.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    c.organizer.toLowerCase().includes(adminSearch.toLowerCase())
+  );
+  const totalCompPages = Math.ceil(filteredComp.length / adminItemsPerPage);
+  const paginatedComp = filteredComp.slice((adminPage - 1) * adminItemsPerPage, adminPage * adminItemsPerPage);
+
+  // 6. Blog & Edukasi (5 item)
+  const filteredBlogs = blogs.filter((b) =>
+    b.title.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    b.author.toLowerCase().includes(adminSearch.toLowerCase())
+  );
+  const totalBlogPages = Math.ceil(filteredBlogs.length / adminItemsPerPage);
+  const paginatedBlogs = filteredBlogs.slice((adminPage - 1) * adminItemsPerPage, adminPage * adminItemsPerPage);
 
   return (
 <div className="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#121215] text-slate-800 dark:text-[#bebeca] transition-colors duration-300">{/* ========================================================
@@ -188,7 +239,7 @@ export const AdminDashboard: React.FC = () => {
               <Link to="/" className="text-xs text-slate-500 dark:text-[#bebeca]/60 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition-colors mb-2">
                 <ArrowLeft size={13} /> Ke Website Publik
               </Link>
-              <h1 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight leading-snug">HMIF CMS Panel</h1>
+              <h1 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight leading-snug">HMIF Admin Panel</h1>
               <p className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60">Login: @{adminUsername}</p>
             </div>
 
@@ -517,11 +568,10 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* TAB 3: PROGRAM KERJA */}
+{/* TAB 3: PROGRAM KERJA */}
           {activeTab === 'programs' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">Program Kerja ({currentDiv.shortName})</h2>
                 <button
                   type="button"
@@ -536,238 +586,307 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                {currentDiv.programs.map((p, idx) => (
-                  <div key={idx} className="liquid-glass p-6 rounded-2xl border border-slate-300 dark:border-[#3c3c44] space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-[#3c3c44] text-slate-800 dark:text-[#bebeca] border border-slate-300 dark:border-[#bebeca]/20">
-                          {p.status}
-                        </span>
-                        <h4 className="font-bold text-base text-slate-900 dark:text-white mt-2">{p.title}</h4>
-                      </div>
-                      
-                      {/* TOMBOL EDIT & TOMBOL HAPUS BARU */}
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProgramIndex(idx);
-                            setProgramForm({...p});
-                            setShowProgramModal(true);
-                          }}
-                          className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg hover:bg-slate-200 dark:hover:bg-[#3c3c44] text-slate-700 dark:text-[#bebeca] cursor-pointer"
-                          title="Edit Proker"
-                        >
-                          <Edit3 size={14}/>
-                        </button>
+              {/* SEARCHBAR PROKER */}
+              <SearchBar
+                value={adminSearch}
+                onChange={handleSearchChange}
+                placeholder="Cari program kerja divisi ini..."
+              />
 
-                        {/* ✅ TOMBOL DELETE INI YANG SUDAH DIPERBAIKI (MENGGUNAKAN setDeleteTarget) */}
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget({ type: 'program', slug: selectedDivSlug, index: idx, title: p.title })}
-                          className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg text-red-500 hover:bg-red-500/10 cursor-pointer transition-colors"
-                          title="Hapus Proker"
-                        >
-                          <Trash2 size={14}/>
-                        </button>
-                      </div>
+              {paginatedPrograms.length === 0 ? (
+                <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-[#3c3c44] text-xs opacity-70">
+                  {adminSearch ? `Tidak ada proker dengan kata kunci "${adminSearch}".` : 'Belum ada program kerja di divisi ini.'}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {paginatedPrograms.map((p, idx) => (
+                    <div key={idx} className="liquid-glass p-6 rounded-2xl border border-slate-300 dark:border-[#3c3c44] space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-[#3c3c44] text-slate-800 dark:text-[#bebeca] border border-slate-300 dark:border-[#bebeca]/20">
+                            {p.status}
+                          </span>
+                          <h4 className="font-bold text-base text-slate-900 dark:text-white mt-2">{p.title}</h4>
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setProgramIndex(idx);
+                              setProgramForm({...p});
+                              setShowProgramModal(true);
+                            }}
+                            className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg hover:bg-slate-200 dark:hover:bg-[#3c3c44] text-slate-700 dark:text-[#bebeca] cursor-pointer"
+                            title="Edit Proker"
+                          >
+                            <Edit3 size={14}/>
+                          </button>
 
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget({ type: 'program', slug: selectedDivSlug, index: idx, title: p.title })}
+                            className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg text-red-500 hover:bg-red-500/10 cursor-pointer transition-colors"
+                            title="Hapus Proker"
+                          >
+                            <Trash2 size={14}/>
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-[#bebeca]/80 leading-relaxed">{p.description}</p>
+                      <div className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60 pt-2 border-t border-slate-200 dark:border-[#3c3c44]">
+                        Jadwal: {p.period || 'Coming Soon'}
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-[#bebeca]/80 leading-relaxed">{p.description}</p>
-                    <div className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60 pt-2 border-t border-slate-200 dark:border-[#3c3c44]">
-                      Jadwal: {p.period || 'Coming Soon'}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+
+              {/* PAGINATION PROKER */}
+              <Pagination currentPage={adminPage} totalPages={totalProgPages} onPageChange={setAdminPage} />
             </div>
           )}
-{/* TAB 4: PANEL DOKUMENTASI MANDIRI */}
+
+          {/* TAB 4: PANEL DOKUMENTASI MANDIRI */}
           {activeTab === 'documentation' && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Dokumentasi Kegiatan ({currentDiv.shortName})</h2>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Dokumentasi Kegiatan ({currentDiv.shortName})</h2>
                   <p className="text-xs opacity-60">Unggah foto kegiatan, rekap acara, dan tanggal pelaksanaan proker.</p>
                 </div>
-                {/* TOMBOL TAMBAH DOKUMENTASI */}
                 <button
+                  type="button"
                   onClick={handleOpenAddDocModal}
-                  className="px-4 py-2 bg-[#bebeca] hover:bg-white text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+                  className="px-4 py-2 bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:opacity-90"
                 >
                   <Plus size={15} /> Tambah Dokumentasi
                 </button>
               </div>
 
-              {/* DAFTAR DOKUMENTASI KEGIATAN */}
-              {currentDiv.programs.filter((p) => p.documentation || p.status === 'Selesai').length === 0 ? (
+              {/* SEARCHBAR DOKUMENTASI */}
+              <SearchBar
+                value={adminSearch}
+                onChange={handleSearchChange}
+                placeholder="Cari dokumentasi kegiatan..."
+              />
+
+              {paginatedDocs.length === 0 ? (
                 <div className="p-12 text-center liquid-glass rounded-3xl border border-dashed border-[#3c3c44] space-y-3">
                   <div className="w-12 h-12 rounded-full bg-[#232329] border border-[#3c3c44] flex items-center justify-center mx-auto text-[#bebeca]">
                     <Camera size={22} />
                   </div>
-                  <h4 className="text-sm font-bold text-white">Belum Ada Dokumentasi Kegiatan</h4>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Belum Ada Dokumentasi Kegiatan</h4>
                   <p className="text-xs opacity-60 max-w-sm mx-auto">
-                    Divisi ini belum memiliki dokumentasi foto kegiatan. Klik tombol <strong>Tambah Dokumentasi</strong> di atas untuk menambahkan.
+                    {adminSearch ? `Tidak ditemukan dokumentasi dengan kata kunci "${adminSearch}".` : 'Klik tombol Tambah Dokumentasi di atas untuk mulai mendokumentasikan kegiatan.'}
                   </p>
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-4">
-                  {currentDiv.programs.map((p, idx) => {
-                    return (
-                      <div key={idx} className="liquid-glass p-6 rounded-2xl border border-[#3c3c44] flex flex-col justify-between">
-                        <div>
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <span className="text-[10px] font-mono text-[#bebeca] uppercase font-bold px-2 py-0.5 bg-[#232329] rounded border border-[#3c3c44]">
-                                {p.documentation?.date || p.period || 'Tanggal -'}
-                              </span>
-                              <h4 className="font-bold text-base text-white mt-2 leading-snug">{p.title}</h4>
-                            </div>
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                              {p.status}
+                  {paginatedDocs.map((p, idx) => (
+                    <div key={idx} className="liquid-glass p-6 rounded-2xl border border-slate-300 dark:border-[#3c3c44] flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="text-[10px] font-mono text-slate-700 dark:text-[#bebeca] uppercase font-bold px-2 py-0.5 bg-slate-200 dark:bg-[#232329] rounded border border-slate-300 dark:border-[#3c3c44]">
+                              {p.documentation?.date || p.period || 'Tanggal -'}
                             </span>
+                            <h4 className="font-bold text-base text-slate-900 dark:text-white mt-2 leading-snug">{p.title}</h4>
                           </div>
-
-                          <p className="text-xs opacity-75 mt-2 mb-4 leading-relaxed line-clamp-3">
-                            {p.documentation?.summary || p.description}
-                          </p>
-
-                          {/* Galeri Thumbnail Foto */}
-                          {p.documentation?.photoUrls && p.documentation.photoUrls.length > 0 ? (
-                            <div className="flex gap-2 overflow-x-auto pb-2">
-                              {p.documentation.photoUrls.map((url, i) => (
-                                <img
-                                  key={i}
-                                  src={url}
-                                  alt=""
-                                  className="w-16 h-16 object-cover rounded-xl border border-[#3c3c44] shrink-0"
-                                />
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-[11px] opacity-40 italic block mb-2">Belum ada foto yang diunggah.</span>
-                          )}
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500">
+                            {p.status}
+                          </span>
                         </div>
 
-                        {/* Tombol Aksi */}
-                        <div className="pt-4 border-t border-[#3c3c44] flex gap-2">
-                          <button
-                            onClick={() => handleOpenEditDocModal(idx)}
-                            className="flex-1 py-2 bg-[#232329] hover:bg-[#3c3c44] border border-[#3c3c44] rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <Edit3 size={13} /> Edit Dokumentasi &amp; Foto
-                          </button>
-                          {/* GANTI TOMBOL TEMPAT SAMPAH DOKUMENTASI INI: */}
-                          <button
-                            type="button"
-                            onClick={() => setDeleteTarget({ 
-                              type: 'program', 
-                              slug: selectedDivSlug, 
-                              index: idx, 
-                              title: p.title 
-                            })}
-                            className="p-2 border border-slate-300 dark:border-[#3c3c44] hover:bg-red-500/10 text-red-500 rounded-xl transition-colors cursor-pointer"
-                            title="Hapus Dokumentasi"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
+                        <p className="text-xs text-slate-600 dark:text-[#bebeca]/80 mt-2 mb-4 leading-relaxed line-clamp-3">
+                          {p.documentation?.summary || p.description}
+                        </p>
+
+                        {p.documentation?.photoUrls && p.documentation.photoUrls.length > 0 ? (
+                          <div className="flex gap-2 overflow-x-auto pb-2">
+                            {p.documentation.photoUrls.map((url, i) => (
+                              <img key={i} src={url} alt="" className="w-16 h-16 object-cover rounded-xl border border-slate-300 dark:border-[#3c3c44] shrink-0" />
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-[11px] opacity-40 italic block mb-2">Belum ada foto yang diunggah.</span>
+                        )}
                       </div>
-                    );
-                  })}
+
+                      <div className="pt-4 border-t border-slate-200 dark:border-[#3c3c44] flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditDocModal(idx)}
+                          className="flex-1 py-2 bg-slate-100 dark:bg-[#232329] hover:bg-slate-200 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs font-semibold text-slate-900 dark:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Edit3 size={13} /> Edit Dokumentasi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget({ type: 'program', slug: selectedDivSlug, index: idx, title: p.title })}
+                          className="p-2 border border-slate-300 dark:border-[#3c3c44] hover:bg-red-500/10 text-red-500 rounded-xl transition-colors cursor-pointer"
+                          title="Hapus Dokumentasi"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
+
+              {/* PAGINATION DOKUMENTASI */}
+              <Pagination currentPage={adminPage} totalPages={totalDocPages} onPageChange={setAdminPage} />
             </div>
           )}
+
           {/* TAB 5: PENGUMUMAN */}
           {activeTab === 'announcements' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Kelola Pengumuman Resmi</h2>
-                <button onClick={() => { setAnnForm({ title: '', content: '', poster_url: '', is_published: true }); setShowAnnModal(true); }} className="px-4 py-2 bg-[#bebeca] hover:bg-white text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kelola Pengumuman Resmi</h2>
+                <button
+                  type="button"
+                  onClick={() => { setAnnForm({ title: '', content: '', poster_url: '', is_published: true }); setShowAnnModal(true); }}
+                  className="px-4 py-2 bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:opacity-90"
+                >
                   <Plus size={15}/> Buat Pengumuman
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {announcements.map((a) => (
-                  <div key={a.id} className="liquid-glass p-5 rounded-2xl border border-[#3c3c44] flex justify-between items-center">
-                    <div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${a.is_published ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10'}`}>
-                        {a.is_published ? 'Published' : 'Draft'}
-                      </span>
-                      <h4 className="font-bold text-base text-white mt-1">{a.title}</h4>
-                      <p className="text-xs opacity-70 line-clamp-1">{a.content}</p>
+              {/* SEARCHBAR PENGUMUMAN */}
+              <SearchBar
+                value={adminSearch}
+                onChange={handleSearchChange}
+                placeholder="Cari judul atau isi pengumuman..."
+              />
+
+              {paginatedAnn.length === 0 ? (
+                <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-[#3c3c44] text-xs opacity-70">
+                  {adminSearch ? `Tidak ada pengumuman dengan kata kunci "${adminSearch}".` : 'Belum ada pengumuman yang dibuat.'}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {paginatedAnn.map((a) => (
+                    <div key={a.id} className="liquid-glass p-5 rounded-2xl border border-slate-300 dark:border-[#3c3c44] flex justify-between items-center">
+                      <div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${a.is_published ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/15 text-slate-500'}`}>
+                          {a.is_published ? 'Published' : 'Draft'}
+                        </span>
+                        <h4 className="font-bold text-base text-slate-900 dark:text-white mt-1">{a.title}</h4>
+                        <p className="text-xs text-slate-600 dark:text-[#bebeca]/70 line-clamp-1">{a.content}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => { setAnnForm(a); setShowAnnModal(true); }} className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg hover:bg-slate-200 dark:hover:bg-[#3c3c44] cursor-pointer"><Edit3 size={14}/></button>
+                        <button type="button" onClick={async () => { if (confirm('Hapus pengumuman ini?')) await deleteAnnouncement(a.id); }} className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg text-red-500 hover:bg-red-500/10 cursor-pointer"><Trash2 size={14}/></button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => { setAnnForm(a); setShowAnnModal(true); }} className="p-2 border border-[#3c3c44] rounded-lg hover:bg-[#3c3c44]"><Edit3 size={14}/></button>
-                      <button onClick={async () => { if (confirm('Hapus pengumuman ini?')) await deleteAnnouncement(a.id); }} className="p-2 border border-[#3c3c44] rounded-lg text-red-400 hover:bg-red-950/40"><Trash2 size={14}/></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+
+              {/* PAGINATION PENGUMUMAN */}
+              <Pagination currentPage={adminPage} totalPages={totalAnnPages} onPageChange={setAdminPage} />
             </div>
           )}
 
           {/* TAB 6: KOMPETISI */}
           {activeTab === 'competitions' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Kelola Informasi Kompetisi</h2>
-                <button onClick={() => { setCompForm({ title: '', organizer: '', deadline: '', registration_link: '', status: 'Dibuka' }); setShowCompModal(true); }} className="px-4 py-2 bg-[#bebeca] hover:bg-white text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kelola Informasi Kompetisi</h2>
+                <button
+                  type="button"
+                  onClick={() => { setCompForm({ title: '', organizer: '', deadline: '', registration_link: '', status: 'Dibuka' }); setShowCompModal(true); }}
+                  className="px-4 py-2 bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:opacity-90"
+                >
                   <Plus size={15}/> Tambah Kompetisi
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                {competitions.map((c) => (
-                  <div key={c.id} className="liquid-glass p-5 rounded-2xl border border-[#3c3c44] flex justify-between items-start">
-                    <div>
-                      <span className="text-xs font-bold text-[#bebeca]">{c.organizer}</span>
-                      <h4 className="font-bold text-base text-white mt-1">{c.title}</h4>
-                      <p className="text-xs opacity-70 font-mono mt-2">Batas: {c.deadline}</p>
+              {/* SEARCHBAR KOMPETISI */}
+              <SearchBar
+                value={adminSearch}
+                onChange={handleSearchChange}
+                placeholder="Cari kompetisi atau penyelenggara..."
+              />
+
+              {paginatedComp.length === 0 ? (
+                <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-[#3c3c44] text-xs opacity-70">
+                  {adminSearch ? `Tidak ada kompetisi dengan kata kunci "${adminSearch}".` : 'Belum ada data kompetisi.'}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-4">
+                  {paginatedComp.map((c) => (
+                    <div key={c.id} className="liquid-glass p-5 rounded-2xl border border-slate-300 dark:border-[#3c3c44] flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-bold text-slate-600 dark:text-[#bebeca]">{c.organizer}</span>
+                        <h4 className="font-bold text-base text-slate-900 dark:text-white mt-1">{c.title}</h4>
+                        <p className="text-xs text-slate-500 dark:text-[#bebeca]/70 font-mono mt-2">Batas: {c.deadline}</p>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <button type="button" onClick={() => { setCompForm(c); setShowCompModal(true); }} className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg hover:bg-slate-200 dark:hover:bg-[#3c3c44] cursor-pointer"><Edit3 size={14}/></button>
+                        <button type="button" onClick={async () => { if (confirm('Hapus kompetisi ini?')) await deleteCompetition(c.id); }} className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg text-red-500 hover:bg-red-500/10 cursor-pointer"><Trash2 size={14}/></button>
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      <button onClick={() => { setCompForm(c); setShowCompModal(true); }} className="p-2 border border-[#3c3c44] rounded-lg hover:bg-[#3c3c44]"><Edit3 size={14}/></button>
-                      <button onClick={async () => { if (confirm('Hapus kompetisi ini?')) await deleteCompetition(c.id); }} className="p-2 border border-[#3c3c44] rounded-lg text-red-400 hover:bg-red-950/40"><Trash2 size={14}/></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+
+              {/* PAGINATION KOMPETISI */}
+              <Pagination currentPage={adminPage} totalPages={totalCompPages} onPageChange={setAdminPage} />
             </div>
           )}
 
           {/* TAB 7: BLOG */}
           {activeTab === 'blogs' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Kelola Blog &amp; Artikel Edukasi</h2>
-                <button onClick={() => { setBlogForm({ title: '', excerpt: '', content: '', author: 'Admin HMIF', tags: ['Informatika'], is_published: true }); setShowBlogModal(true); }} className="px-4 py-2 bg-[#bebeca] hover:bg-white text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kelola Blog &amp; Artikel Edukasi</h2>
+                <button
+                  type="button"
+                  onClick={() => { setBlogForm({ title: '', excerpt: '', content: '', author: 'Admin HMIF', tags: ['Informatika'], is_published: true }); setShowBlogModal(true); }}
+                  className="px-4 py-2 bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:opacity-90"
+                >
                   <Plus size={15}/> Tulis Artikel
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {blogs.map((b) => (
-                  <div key={b.id} className="liquid-glass p-5 rounded-2xl border border-[#3c3c44] flex justify-between items-center">
-                    <div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${b.is_published ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10'}`}>
-                        {b.is_published ? 'Published' : 'Draft'}
-                      </span>
-                      <h4 className="font-bold text-base text-white mt-1">{b.title}</h4>
-                      <p className="text-xs opacity-70">Penulis: {b.author}</p>
+              {/* SEARCHBAR BLOG */}
+              <SearchBar
+                value={adminSearch}
+                onChange={handleSearchChange}
+                placeholder="Cari artikel atau penulis..."
+              />
+
+              {paginatedBlogs.length === 0 ? (
+                <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-[#3c3c44] text-xs opacity-70">
+                  {adminSearch ? `Tidak ada artikel dengan kata kunci "${adminSearch}".` : 'Belum ada artikel yang dibuat.'}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {paginatedBlogs.map((b) => (
+                    <div key={b.id} className="liquid-glass p-5 rounded-2xl border border-slate-300 dark:border-[#3c3c44] flex justify-between items-center">
+                      <div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${b.is_published ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-slate-500/15 text-slate-500'}`}>
+                          {b.is_published ? 'Published' : 'Draft'}
+                        </span>
+                        <h4 className="font-bold text-base text-slate-900 dark:text-white mt-1">{b.title}</h4>
+                        <p className="text-xs text-slate-500 dark:text-[#bebeca]/70">Penulis: {b.author}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => { setBlogForm(b); setShowBlogModal(true); }} className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg hover:bg-slate-200 dark:hover:bg-[#3c3c44] cursor-pointer"><Edit3 size={14}/></button>
+                        <button type="button" onClick={async () => { if (confirm('Hapus artikel ini?')) await deleteBlog(b.id); }} className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg text-red-500 hover:bg-red-500/10 cursor-pointer"><Trash2 size={14}/></button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => { setBlogForm(b); setShowBlogModal(true); }} className="p-2 border border-[#3c3c44] rounded-lg hover:bg-[#3c3c44]"><Edit3 size={14}/></button>
-                      <button onClick={async () => { if (confirm('Hapus artikel ini?')) await deleteBlog(b.id); }} className="p-2 border border-[#3c3c44] rounded-lg text-red-400 hover:bg-red-950/40"><Trash2 size={14}/></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
+
+              {/* PAGINATION BLOG */}
+              <Pagination currentPage={adminPage} totalPages={totalBlogPages} onPageChange={setAdminPage} />
             </div>
           )}
-
         </div>
       </main>
 {/* ========================================================

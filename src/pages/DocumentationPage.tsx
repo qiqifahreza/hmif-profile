@@ -1,21 +1,45 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Calendar } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
+import { SearchBar } from '../components/SearchBar';
+import { Pagination } from '../components/Pagination';
 
 export const DocumentationPage: React.FC = () => {
   const { divisions } = useData();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 1;
 
-  const documentedPrograms = divisions.flatMap((d) =>
-    d.programs
-      .filter((p) => p.status === 'Selesai' || p.documentation)
-      .map((p) => ({ ...p, divName: d.name }))
-  );
+  const documentedPrograms = useMemo(() => {
+    return divisions.flatMap((d) =>
+      d.programs
+        .filter((p) => p.status === 'Selesai' || p.documentation)
+        .map((p) => ({ ...p, divName: d.name }))
+    );
+  }, [divisions]);
+
+  const filtered = useMemo(() => {
+    return documentedPrograms.filter((p) => {
+      const q = searchQuery.toLowerCase();
+      return (
+        p.title.toLowerCase().includes(q) ||
+        p.divName.toLowerCase().includes(q) ||
+        (p.documentation?.summary && p.documentation.summary.toLowerCase().includes(q))
+      );
+    });
+  }, [documentedPrograms, searchQuery]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleSearch = (val: string) => {
+    setSearchQuery(val);
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
-      
-      {/* Header Halaman */}
+    <div className="max-w-7xl mx-auto px-4 py-12 space-y-10">
       <div className="text-center max-w-3xl mx-auto">
         <span className="text-xs font-mono uppercase tracking-widest text-slate-700 dark:text-[#bebeca] bg-slate-200/80 dark:bg-primary/20 px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-secondary/25 font-bold">
           Galeri &amp; Rekap
@@ -28,13 +52,21 @@ export const DocumentationPage: React.FC = () => {
         </p>
       </div>
 
-      {documentedPrograms.length === 0 ? (
+      <div className="flex justify-center">
+        <SearchBar
+          value={searchQuery}
+          onChange={handleSearch}
+          placeholder="Cari dokumentasi kegiatan atau divisi..."
+        />
+      </div>
+
+      {paginated.length === 0 ? (
         <div className="text-center p-16 liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-          Belum ada program kerja yang selesai didokumentasikan.
+          {searchQuery ? `Tidak ada dokumentasi kegiatan dengan kata kunci "${searchQuery}".` : 'Belum ada program kerja yang selesai didokumentasikan.'}
         </div>
       ) : (
         <div className="space-y-10">
-          {documentedPrograms.map((p, idx) => (
+          {paginated.map((p, idx) => (
             <SpotlightCard key={idx} className="p-8 sm:p-10 space-y-6 border border-slate-300/80 dark:border-secondary/20">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-secondary/15 pb-4">
                 <div>
@@ -73,6 +105,8 @@ export const DocumentationPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );
 };
