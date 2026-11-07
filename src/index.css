@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* ⚠️ BARIS INI WAJIB: Memaksa Tailwind v4 mengikuti tombol toggle class .dark */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @source "../index.html";
@@ -12,11 +11,12 @@
   --color-bg-main: var(--theme-bg);
   --color-surface-main: var(--theme-surface);
   --color-border-main: var(--theme-border);
+  
+  /* Daftarkan Font Sans Global */
+  --font-sans: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-/* ========================================================
-   LIGHT MODE: Teks Gelap Pekat (#0f172a), Kaca Kristal Terang
-   ======================================================== */
+/* Base Light Mode */
 :root {
   --theme-bg: #f8fafc;
   --theme-surface: rgba(255, 255, 255, 0.85);
@@ -25,9 +25,7 @@
   --theme-spotlight: rgba(15, 23, 42, 0.06);
 }
 
-/* ========================================================
-   DARK MODE: Teks Putih & Silver (#bebeca), Kaca Gelap
-   ======================================================== */
+/* Base Dark Mode */
 .dark {
   --theme-bg: #101014;
   --theme-surface: rgba(30, 30, 36, 0.6);
@@ -36,12 +34,21 @@
   --theme-spotlight: rgba(190, 190, 202, 0.22);
 }
 
+/* Terapkan SF Pro ke Seluruh Elemen Global */
 body {
   background-color: var(--theme-bg);
   color: var(--theme-text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.015em; /* Khas tipografi rapat presisi ala Apple */
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
+}
+
+/* Pastikan semua tombol, input, dan textarea mewarisi font SF Pro */
+input, button, textarea, select {
+  font-family: inherit;
 }
 
 /* Efek Kaca Cair Adaptif */
