@@ -55,6 +55,13 @@ export const AdminDashboard: React.FC = () => {
     summary: '',
     photoUrls: [] as string[],
   });
+  // State Modal Konfirmasi Hapus (Menggantikan confirm browser yang sering diblokir)
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: 'program' | 'member';
+    slug: string;
+    index: number;
+    title: string;
+  } | null>(null);
   const [tempDocPhotoUrl, setTempDocPhotoUrl] = useState('');
 
   const [showAnnModal, setShowAnnModal] = useState(false);
@@ -489,8 +496,19 @@ export const AdminDashboard: React.FC = () => {
                         <button onClick={() => { setIsEditingLeader(null); setMemberIndex(idx); setMemberForm({...m}); setShowMemberModal(true); }} className="p-1.5 hover:bg-[#3c3c44] rounded">
                           <Edit3 size={14}/>
                         </button>
-                        <button onClick={async () => { if (confirm(`Hapus anggota ${m.name}?`)) await deleteMember(selectedDivSlug, idx); }} className="p-1.5 text-red-400 hover:bg-red-950/40 rounded">
-                          <Trash2 size={14}/>
+                        {/* GANTI TOMBOL TEMPAT SAMPAH ANGGOTA INI: */}
+                        <button 
+                          type="button"
+                          onClick={() => setDeleteTarget({ 
+                            type: 'member', 
+                            slug: selectedDivSlug, 
+                            index: idx, 
+                            title: m.name 
+                          })} 
+                          className="p-1.5 text-red-500 hover:bg-red-500/10 rounded cursor-pointer transition-colors"
+                          title="Hapus Anggota"
+                        >
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -504,27 +522,62 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'programs' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Program Kerja ({currentDiv.shortName})</h2>
-                <button onClick={() => { setProgramIndex(null); setProgramForm({ title: '', description: '', period: '', status: 'Direncanakan' }); setShowProgramModal(true); }} className="px-4 py-2 bg-[#bebeca] hover:bg-white text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Program Kerja ({currentDiv.shortName})</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProgramIndex(null);
+                    setProgramForm({ title: '', description: '', period: '', status: 'Direncanakan' });
+                    setShowProgramModal(true);
+                  }}
+                  className="px-4 py-2 bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer hover:opacity-90"
+                >
                   <Plus size={15}/> Tambah Proker
                 </button>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 {currentDiv.programs.map((p, idx) => (
-                  <div key={idx} className="liquid-glass p-6 rounded-2xl border border-[#3c3c44] space-y-3">
+                  <div key={idx} className="liquid-glass p-6 rounded-2xl border border-slate-300 dark:border-[#3c3c44] space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#3c3c44] text-[#bebeca] border border-[#bebeca]/20">{p.status}</span>
-                        <h4 className="font-bold text-base text-white mt-2">{p.title}</h4>
+                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-[#3c3c44] text-slate-800 dark:text-[#bebeca] border border-slate-300 dark:border-[#bebeca]/20">
+                          {p.status}
+                        </span>
+                        <h4 className="font-bold text-base text-slate-900 dark:text-white mt-2">{p.title}</h4>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => { setProgramIndex(idx); setProgramForm({...p}); setShowProgramModal(true); }} className="p-2 border border-[#3c3c44] rounded-lg hover:bg-[#3c3c44]"><Edit3 size={14}/></button>
-                        <button onClick={async () => { if (confirm(`Hapus proker "${p.title}"?`)) await deleteProgram(selectedDivSlug, idx); }} className="p-2 border border-[#3c3c44] rounded-lg text-red-400 hover:bg-red-950/40"><Trash2 size={14}/></button>
+                      
+                      {/* TOMBOL EDIT & TOMBOL HAPUS BARU */}
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProgramIndex(idx);
+                            setProgramForm({...p});
+                            setShowProgramModal(true);
+                          }}
+                          className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg hover:bg-slate-200 dark:hover:bg-[#3c3c44] text-slate-700 dark:text-[#bebeca] cursor-pointer"
+                          title="Edit Proker"
+                        >
+                          <Edit3 size={14}/>
+                        </button>
+
+                        {/* ✅ TOMBOL DELETE INI YANG SUDAH DIPERBAIKI (MENGGUNAKAN setDeleteTarget) */}
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget({ type: 'program', slug: selectedDivSlug, index: idx, title: p.title })}
+                          className="p-2 border border-slate-300 dark:border-[#3c3c44] rounded-lg text-red-500 hover:bg-red-500/10 cursor-pointer transition-colors"
+                          title="Hapus Proker"
+                        >
+                          <Trash2 size={14}/>
+                        </button>
                       </div>
+
                     </div>
-                    <p className="text-xs opacity-75 leading-relaxed">{p.description}</p>
-                    <div className="text-[11px] font-mono opacity-60 pt-2 border-t border-[#3c3c44]">Jadwal: {p.period || 'Coming Soon'}</div>
+                    <p className="text-xs text-slate-600 dark:text-[#bebeca]/80 leading-relaxed">{p.description}</p>
+                    <div className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60 pt-2 border-t border-slate-200 dark:border-[#3c3c44]">
+                      Jadwal: {p.period || 'Coming Soon'}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -605,14 +658,17 @@ export const AdminDashboard: React.FC = () => {
                           >
                             <Edit3 size={13} /> Edit Dokumentasi &amp; Foto
                           </button>
+                          {/* GANTI TOMBOL TEMPAT SAMPAH DOKUMENTASI INI: */}
                           <button
-                            onClick={async () => {
-                              if (confirm(`Hapus dokumentasi untuk "${p.title}"?`)) {
-                                await deleteProgram(selectedDivSlug, idx);
-                              }
-                            }}
-                            className="p-2 border border-[#3c3c44] hover:bg-red-950/40 text-red-400 rounded-xl transition-colors cursor-pointer"
-                            title="Hapus"
+                            type="button"
+                            onClick={() => setDeleteTarget({ 
+                              type: 'program', 
+                              slug: selectedDivSlug, 
+                              index: idx, 
+                              title: p.title 
+                            })}
+                            className="p-2 border border-slate-300 dark:border-[#3c3c44] hover:bg-red-500/10 text-red-500 rounded-xl transition-colors cursor-pointer"
+                            title="Hapus Dokumentasi"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1134,7 +1190,49 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      {/* MODAL KONFIRMASI HAPUS */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="liquid-glass rounded-2xl p-6 max-w-sm w-full border border-red-500/40 text-center space-y-4 shadow-2xl">
+            <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center mx-auto border border-red-500/30">
+              <Trash2 size={22} />
+            </div>
+            
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Konfirmasi Hapus</h3>
+            
+            <p className="text-xs text-slate-600 dark:text-[#bebeca]/80 leading-relaxed">
+              Apakah Anda yakin ingin menghapus <strong className="text-slate-950 dark:text-white">&ldquo;{deleteTarget.title}&rdquo;</strong>?
+              <br />Tindakan ini akan menghapus data dari Supabase.
+            </p>
+
+            <div className="flex gap-2 justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 dark:border-[#3c3c44] text-xs font-semibold hover:bg-slate-200 dark:hover:bg-[#232329] transition-colors cursor-pointer text-slate-700 dark:text-[#bebeca]"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (deleteTarget.type === 'program') {
+                    await deleteProgram(deleteTarget.slug, deleteTarget.index);
+                  } else {
+                    await deleteMember(deleteTarget.slug, deleteTarget.index);
+                  }
+                  setDeleteTarget(null);
+                }}
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-lg transition-all cursor-pointer"
+              >
+                Ya, Hapus Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
+    
   );
 };
