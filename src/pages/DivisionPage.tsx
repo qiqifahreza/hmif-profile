@@ -13,8 +13,8 @@ const MemberAvatar: React.FC<{ member: Member; isLeader: boolean }> = ({ member,
       <div
         className={`w-24 h-24 rounded-full overflow-hidden flex items-center justify-center transition-all duration-500 ${
           isLeader
-            ? 'border-2 border-[#bebeca] bg-[#3c3c44]/60 shadow-[0_0_25px_rgba(190,190,202,0.3)] ring-4 ring-[#bebeca]/20'
-            : 'border border-[#bebeca]/25 bg-[#19191d]/80 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]'
+            ? 'border-2 border-slate-900 dark:border-[#bebeca] bg-slate-200 dark:bg-[#3c3c44]/60 shadow-md ring-4 ring-slate-300 dark:ring-[#bebeca]/20'
+            : 'border border-slate-300 dark:border-[#bebeca]/25 bg-slate-100 dark:bg-[#19191d]/80'
         }`}
       >
         {member.imageUrl && !hasError ? (
@@ -26,13 +26,13 @@ const MemberAvatar: React.FC<{ member: Member; isLeader: boolean }> = ({ member,
             className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-500"
           />
         ) : (
-          <User size={40} className={isLeader ? 'text-white' : 'text-[#bebeca]'} />
+          <User size={40} className={isLeader ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-[#bebeca]'} />
         )}
       </div>
 
       {isLeader && (
-        <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[#3c3c44] border border-[#bebeca] flex items-center justify-center text-white shadow-md">
-          <ShieldCheck size={13} className="text-[#bebeca]" />
+        <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-slate-900 dark:bg-[#3c3c44] border border-white dark:border-[#bebeca] flex items-center justify-center text-white shadow-md">
+          <ShieldCheck size={13} className="text-white dark:text-[#bebeca]" />
         </div>
       )}
     </div>
@@ -47,31 +47,30 @@ export const DivisionPage: React.FC = () => {
   if (!division) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center px-4">
-        <h1 className="text-3xl font-bold mb-4 text-white">Divisi Tidak Ditemukan</h1>
-        <Link to="/tentang" className="text-secondary hover:underline inline-flex items-center gap-2">
+        <h1 className="text-3xl font-bold mb-4 text-slate-950 dark:text-white">Divisi Tidak Ditemukan</h1>
+        <Link to="/tentang" className="text-blue-600 dark:text-[#bebeca] hover:underline inline-flex items-center gap-2">
           <ArrowLeft size={16} /> Kembali ke Halaman Struktur
         </Link>
       </div>
     );
   }
 
-  // Kartu Anggota menggunakan SpotlightCard
   const renderMemberCard = (member: Member, isLeader = false) => (
     <SpotlightCard
       key={member.nim || member.name}
-      className={`p-6 flex flex-col items-center text-center ${
-        isLeader ? 'ring-1 ring-[#bebeca]/30' : ''
+      className={`p-6 flex flex-col items-center text-center border border-slate-300/80 dark:border-secondary/20 ${
+        isLeader ? 'ring-1 ring-slate-300 dark:ring-[#bebeca]/30' : ''
       }`}
     >
       <MemberAvatar member={member} isLeader={isLeader} />
-      <h4 className="text-lg font-bold text-white dark:text-white light:text-[#121215] mb-1 leading-snug">{member.name}</h4>
+      <h4 className="text-lg font-bold text-slate-950 dark:text-white mb-1 leading-snug">{member.name}</h4>
       <div className="flex items-center gap-1.5 mb-3">
-        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/40 text-secondary border border-secondary/25">
+        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-primary/40 text-slate-800 dark:text-secondary border border-slate-300 dark:border-secondary/25">
           {member.role}
         </span>
       </div>
       {member.nim && (
-        <span className="text-[11px] font-mono opacity-70 px-2.5 py-1 rounded-md border border-secondary/20">
+        <span className="text-[11px] font-mono text-slate-600 dark:text-[#bebeca]/80 px-2.5 py-1 rounded-md border border-slate-300 dark:border-secondary/20 bg-slate-100 dark:bg-[#121215]/80">
           NIM: {member.nim}
         </span>
       )}
@@ -82,28 +81,28 @@ export const DivisionPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-14">
       <Link
         to="/tentang"
-        className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100 transition-colors px-4 py-2 rounded-xl liquid-glass w-fit"
+        className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-[#bebeca] hover:text-slate-950 dark:hover:text-white transition-colors px-4 py-2 rounded-xl liquid-glass border border-slate-300 dark:border-secondary/20 w-fit"
       >
         <ArrowLeft size={16} /> Kembali ke Struktur Organisasi
       </Link>
 
-      {/* Header Divisi dengan Spotlight */}
-      <SpotlightCard className="p-8 sm:p-12 rounded-3xl">
-        <span className="text-xs uppercase font-mono tracking-widest px-3.5 py-1.5 bg-primary/40 text-secondary border border-secondary/25 rounded-full w-fit">
+      {/* Header Divisi */}
+      <SpotlightCard className="p-8 sm:p-12 rounded-3xl border border-slate-300/80 dark:border-secondary/20">
+        <span className="text-xs uppercase font-mono tracking-widest px-3.5 py-1.5 bg-slate-200 dark:bg-primary/40 text-slate-800 dark:text-secondary border border-slate-300 dark:border-secondary/25 rounded-full w-fit font-bold">
           Divisi Kabinet Samvaya
         </span>
-        <h1 className="text-3xl sm:text-5xl font-black mt-5 mb-4 tracking-tight text-white dark:text-white light:text-[#121215]">
+        <h1 className="text-3xl sm:text-5xl font-black mt-5 mb-4 tracking-tight text-slate-950 dark:text-white">
           {division.name}
         </h1>
-        <p className="opacity-90 text-base sm:text-lg max-w-3xl leading-relaxed font-normal">
+        <p className="text-slate-700 dark:text-[#bebeca]/90 text-base sm:text-lg max-w-3xl leading-relaxed font-normal">
           {division.about}
         </p>
       </SpotlightCard>
 
       {/* Pimpinan */}
       <div>
-        <h2 className="text-2xl font-bold text-white dark:text-white light:text-[#121215] mb-2">Pimpinan Divisi</h2>
-        <div className="h-1 w-12 bg-secondary/50 rounded mb-6"></div>
+        <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Pimpinan Divisi</h2>
+        <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {renderMemberCard(division.leader, true)}
           {division.coLeader && renderMemberCard(division.coLeader, true)}
@@ -113,31 +112,31 @@ export const DivisionPage: React.FC = () => {
       {/* Anggota */}
       {division.members.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-white dark:text-white light:text-[#121215] mb-2">Anggota Staf</h2>
-          <div className="h-1 w-12 bg-secondary/50 rounded mb-6"></div>
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Anggota Staf</h2>
+          <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {division.members.map((m) => renderMemberCard(m, false))}
           </div>
         </div>
       )}
 
-      {/* Proker Divisi dengan Spotlight */}
+      {/* Proker Divisi */}
       <div>
-        <h2 className="text-2xl font-bold text-white dark:text-white light:text-[#121215] mb-2">Program Kerja Divisi</h2>
-        <div className="h-1 w-12 bg-secondary/50 rounded mb-6"></div>
+        <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Program Kerja Divisi</h2>
+        <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
         <div className="grid md:grid-cols-2 gap-6">
           {division.programs.map((proker, index) => (
-            <SpotlightCard key={index} className="p-7">
+            <SpotlightCard key={index} className="p-7 border border-slate-300/80 dark:border-secondary/20">
               <div>
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-primary/30 text-secondary border border-secondary/25">
-                  {proker.status}
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-primary/30 text-slate-800 dark:text-secondary border border-slate-300 dark:border-secondary/25">
+                  {proker.status || 'Direncanakan'}
                 </span>
-                <h3 className="text-xl font-bold text-white dark:text-white light:text-[#121215] mt-3 mb-2.5 leading-snug">{proker.title}</h3>
-                <p className="opacity-80 text-sm leading-relaxed mb-6 font-normal">
+                <h3 className="text-xl font-bold text-slate-950 dark:text-white mt-3 mb-2.5 leading-snug">{proker.title}</h3>
+                <p className="text-slate-600 dark:text-[#bebeca]/80 text-sm leading-relaxed mb-6 font-normal">
                   {proker.description}
                 </p>
               </div>
-              <div className="pt-4 border-t border-secondary/15 flex items-center gap-2 text-xs font-mono opacity-80">
+              <div className="pt-4 border-t border-slate-200 dark:border-secondary/15 flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-[#bebeca]/80">
                 <Calendar size={14} />
                 <span>Jadwal: {proker.period || 'Coming Soon'}</span>
               </div>
