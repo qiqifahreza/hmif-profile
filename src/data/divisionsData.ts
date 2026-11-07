@@ -309,7 +309,7 @@ export const divisionsData: DivisionDetail[] = [
   {
     slug: 'ristek',
     name: 'Riset & Teknologi',
-    shortName: 'Ristek & Teknologi',
+    shortName: 'Riset & Teknologi',
     about: 'Inkubasi keterampilan teknikal mahasiswa melalui coding camp, riset software, persiapan lomba kompetitif, dan proyek open-source.',
     leader: { 
       name: 'Nia Ramadani', 
