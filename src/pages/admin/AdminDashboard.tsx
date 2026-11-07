@@ -243,7 +243,7 @@ export const AdminDashboard: React.FC = () => {
               <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-[#bebeca]/50 block px-2 mb-1.5">
                 Pilih Divisi
               </span>
-              <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-1 max-h-70 overflow-y-auto pr-1">
                 {divisions.map((d) => (
                   <button
                     key={d.slug}
