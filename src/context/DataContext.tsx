@@ -35,6 +35,7 @@ interface DataContextType {
   deleteCompetition: (id: string) => Promise<void>;
   saveBlog: (data: Partial<BlogPost>) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
+  updateDivisionInfo: (slug: string, info: { name: string; shortName: string; about: string }) => Promise<void>;
 }
 
 const STRICT_DIVISION_ORDER = [
@@ -94,6 +95,32 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => localStorage.getItem('hmif_theme') !== 'light');
   const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('hmif_admin_session') === 'true');
   const [adminUsername, setAdminUsername] = useState('admin');
+  // Update Nama Lengkap, Nama Singkat, dan Deskripsi Divisi
+const updateDivisionInfo = async (slug: string, info: { name: string; shortName: string; about: string }) => {
+  const target = divisions.find((d) => d.slug === slug);
+  if (!target) return;
+
+  const updated = {
+    ...target,
+    name: info.name.trim(),
+    shortName: info.shortName.trim(),
+    about: info.about.trim(),
+  };
+
+  // Update di state frontend
+  setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+
+  // Sync langsung ke Supabase
+  try {
+    await supabase.from('divisions').update({
+      name: updated.name,
+      short_name: updated.shortName,
+      about: updated.about,
+    }).eq('slug', slug);
+  } catch (err) {
+    console.error('Gagal update info divisi ke Supabase:', err);
+  }
+};
 
   const applyThemeColors = useCallback((dark: boolean, currentSettings: SiteSettings) => {
     const root = document.documentElement;
@@ -348,6 +375,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         changeCredentials,
         updateSettings,
+        updateDivisionInfo,
         updateLeader,
         updateCoLeader,
         addMember,

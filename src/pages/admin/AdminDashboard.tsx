@@ -13,6 +13,7 @@ export const AdminDashboard: React.FC = () => {
   const { 
     divisions, announcements, competitions, blogs, settings,
     isAdmin, adminUsername, logout, changeCredentials, updateSettings,
+    updateDivisionInfo,
     isDarkMode, toggleTheme,
     updateLeader, updateCoLeader, addMember, updateMember, deleteMember,
     addProgram, updateProgram, deleteProgram,
@@ -78,6 +79,9 @@ export const AdminDashboard: React.FC = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [newUsername, setNewUsername] = useState(adminUsername);
   const [newPassword, setNewPassword] = useState('');
+  // State Modal Edit Informasi Divisi (Nama & Deskripsi)
+  const [showDivInfoModal, setShowDivInfoModal] = useState(false);
+  const [divInfoForm, setDivInfoForm] = useState({ name: '', shortName: '', about: '' });
 
   if (!isAdmin) {
     return <Navigate to="/admin/login" replace />;
@@ -475,11 +479,38 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* TAB 2: DIVISI & ANGGOTA (DENGAN UPLOAD FOTO PROFIL LOKAL) */}
-          {activeTab === 'divisions' && (
+                    {activeTab === 'divisions' && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Kelola {currentDiv.name}</h2>
+              
+              {/* KOTAK INFORMASI NAMA & DESKRIPSI DIVISI */}
+              <div className="liquid-glass p-6 rounded-2xl border border-slate-300 dark:border-[#3c3c44] space-y-3">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase bg-slate-200 dark:bg-primary/40 text-slate-800 dark:text-secondary border border-slate-300 dark:border-secondary/25 px-2.5 py-0.5 rounded-full font-bold">
+                      {currentDiv.shortName}
+                    </span>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-2 leading-snug">{currentDiv.name}</h3>
+                    <p className="text-xs text-slate-600 dark:text-[#bebeca]/80 mt-1.5 leading-relaxed font-normal">{currentDiv.about}</p>
+                  </div>
+                  
+                  {/* Tombol Edit Info Divisi */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDivInfoForm({
+                        name: currentDiv.name,
+                        shortName: currentDiv.shortName,
+                        about: currentDiv.about,
+                      });
+                      setShowDivInfoModal(true);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-white dark:bg-[#232329] border border-slate-300 dark:border-[#3c3c44] hover:bg-slate-100 dark:hover:bg-[#3c3c44] text-xs font-semibold text-slate-800 dark:text-white flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer shadow-sm"
+                  >
+                    <Edit3 size={14} /> Edit Info Divisi
+                  </button>
+                </div>
               </div>
+
 
               {/* Pimpinan */}
               <div className="liquid-glass p-6 rounded-2xl border border-[#3c3c44] space-y-4">
@@ -889,6 +920,78 @@ export const AdminDashboard: React.FC = () => {
           )}
         </div>
       </main>
+      {/* ========================================================
+          MODAL FORM EDIT INFORMASI DIVISI (NAMA & DESKRIPSI)
+         ======================================================== */}
+      {showDivInfoModal && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="liquid-glass rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-300 dark:border-[#3c3c44] space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Edit Informasi Divisi</h3>
+            <p className="text-xs text-slate-500 dark:text-[#bebeca]/70">Ubah nama resmi, singkatan (badge), dan deskripsi divisi ini.</p>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                await updateDivisionInfo(selectedDivSlug, divInfoForm);
+                setShowDivInfoModal(false);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-white font-bold">Nama Lengkap Divisi</label>
+                <input
+                  type="text"
+                  value={divInfoForm.name}
+                  onChange={(e) => setDivInfoForm({ ...divInfoForm, name: e.target.value })}
+                  placeholder="Contoh: Riset & Teknologi"
+                  className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-white font-bold">Nama Singkat / Badge</label>
+                <input
+                  type="text"
+                  value={divInfoForm.shortName}
+                  onChange={(e) => setDivInfoForm({ ...divInfoForm, shortName: e.target.value })}
+                  placeholder="Contoh: Ristek"
+                  className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono mb-1 text-slate-700 dark:text-white font-bold">Deskripsi / Tentang Divisi</label>
+                <textarea
+                  rows={4}
+                  value={divInfoForm.about}
+                  onChange={(e) => setDivInfoForm({ ...divInfoForm, about: e.target.value })}
+                  placeholder="Jelaskan peran dan fokus utama divisi ini..."
+                  className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-[#3c3c44]">
+                <button
+                  type="button"
+                  onClick={() => setShowDivInfoModal(false)}
+                  className="px-4 py-2 border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-700 dark:text-[#bebeca] cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold rounded-xl shadow-lg cursor-pointer hover:opacity-90"
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 {/* ========================================================
           MODAL FORM TAMBAH / EDIT DOKUMENTASI KEGIATAN
          ======================================================== */}
