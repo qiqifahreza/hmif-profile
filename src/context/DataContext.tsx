@@ -191,14 +191,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     applyThemeColors(isDarkMode, merged);
     await supabase.from('site_settings').update(newSettings).eq('id', 1);
   };
-
+// Helper sinkronisasi divisi ke Supabase dengan proteksi error
   const syncDivisionToSupabase = async (updated: DivisionDetail) => {
-    await supabase.from('divisions').update({
-      leader: updated.leader,
-      co_leader: updated.coLeader,
-      members: updated.members,
-      programs: updated.programs,
-    }).eq('slug', updated.slug);
+    try {
+      const { error } = await supabase
+        .from('divisions')
+        .update({
+          leader: updated.leader,
+          co_leader: updated.coLeader || null,
+          members: updated.members || [],
+          programs: updated.programs || [],
+        })
+        .eq('slug', updated.slug);
+
+      if (error) {
+        console.error('Supabase update error:', error.message);
+      }
+    } catch (err) {
+      console.error('Gagal sinkronisasi ke Supabase:', err);
+    }
   };
 
   // CRUD Mahasiswa & Pimpinan (Fix Local State & Supabase Update)
