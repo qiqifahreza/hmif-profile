@@ -21,7 +21,13 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 glass-effect border-b transition-colors duration-300">
+    <nav
+      className="fixed top-0 left-0 w-full z-50 backdrop-blur-xl bg-white/75 dark:bg-[#101014]/75 border-b border-slate-200/80 dark:border-[#3c3c44] transition-colors duration-300"
+      style={{
+        WebkitBackdropFilter: 'blur(16px)',
+        backdropFilter: 'blur(16px)',
+      }}
+    >
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Nama Organisasi */}
