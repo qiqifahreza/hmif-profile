@@ -15,15 +15,15 @@ export const AdminLogin: React.FC = () => {
     return <Navigate to="/admin/dashboard" replace />;
   }
 // ✅ Tambahkan "async" dan "await"
-const executeLogin = async () => {
-  const success = await login(username, password);
-  if (success) {
-    navigate('/admin/dashboard');
-  } else {
-    setError(true);
-  }
-};
-
+// ✅ Panggil fungsi login dari useData()
+  const executeLogin = async () => {
+    const success = await login(username, password);
+    if (success) {
+      navigate('/admin/dashboard');
+    } else {
+      setError(true);
+    }
+  };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       executeLogin();

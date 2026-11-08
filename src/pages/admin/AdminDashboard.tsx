@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { 
   LogOut, Plus, Trash2, Edit3, ArrowLeft,
-  Calendar, Layers, KeyRound, Palette, Bell, Trophy, BookOpen, Camera, Upload, X, Sun, Moon
+  Calendar, Layers, KeyRound, Palette, Bell, Trophy, BookOpen, Camera, Upload, X, Sun, Moon, Menu, ChevronDown
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import type { Member, DivisionProker, ProkerStatus, Announcement, Competition, BlogPost, SiteSettings } from '../../types';
@@ -12,9 +12,8 @@ import { Pagination } from '../../components/Pagination';
 export const AdminDashboard: React.FC = () => {
   const { 
     divisions, announcements, competitions, blogs, settings,
-    isAdmin, adminUsername, logout, changeCredentials, updateSettings,
+    isAdmin, adminUsername, isDarkMode, toggleTheme, logout, changeCredentials, updateSettings,
     updateDivisionInfo,
-    isDarkMode, toggleTheme,
     updateLeader, updateCoLeader, addMember, updateMember, deleteMember,
     addProgram, updateProgram, deleteProgram,
     saveAnnouncement, deleteAnnouncement,
@@ -23,6 +22,9 @@ export const AdminDashboard: React.FC = () => {
   } = useData();
 
   const navigate = useNavigate();
+
+  // State Buka/Tutup Sidebar Panel
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Tab Menu Superpanel
   type TabType = 'settings' | 'divisions' | 'programs' | 'documentation' | 'announcements' | 'competitions' | 'blogs';
@@ -58,7 +60,8 @@ export const AdminDashboard: React.FC = () => {
     summary: '',
     photoUrls: [] as string[],
   });
-  // State Modal Konfirmasi Hapus (Menggantikan confirm browser yang sering diblokir)
+
+  // State Modal Konfirmasi Hapus
   const [deleteTarget, setDeleteTarget] = useState<{
     type: 'program' | 'member';
     slug: string;
@@ -79,6 +82,7 @@ export const AdminDashboard: React.FC = () => {
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [newUsername, setNewUsername] = useState(adminUsername);
   const [newPassword, setNewPassword] = useState('');
+
   // State Modal Edit Informasi Divisi (Nama & Deskripsi)
   const [showDivInfoModal, setShowDivInfoModal] = useState(false);
   const [divInfoForm, setDivInfoForm] = useState({ name: '', shortName: '', about: '' });
@@ -106,6 +110,7 @@ export const AdminDashboard: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
+
   // Buka Modal untuk Menambah Dokumentasi Baru
   const handleOpenAddDocModal = () => {
     setIsNewDocActivity(true);
@@ -144,7 +149,6 @@ export const AdminDashboard: React.FC = () => {
     }
 
     if (isNewDocActivity || docSelectedProkerIdx === -1) {
-      // Jika kegiatan baru: tambahkan sebagai proker Selesai baru
       const newProker: DivisionProker = {
         title: docForm.title.trim(),
         description: docForm.summary.trim() || 'Kegiatan terdokumentasi.',
@@ -159,7 +163,6 @@ export const AdminDashboard: React.FC = () => {
       };
       await addProgram(selectedDivSlug, newProker);
     } else {
-      // Jika mengedit proker yang sudah ada
       const target = currentDiv.programs[docSelectedProkerIdx];
       const updated: DivisionProker = {
         ...target,
@@ -178,9 +181,8 @@ export const AdminDashboard: React.FC = () => {
 
     setShowDocModal(false);
   };
-  // Apakah DivisiPanel perlu ditampilkan di sidebar kiri?
-  const showDivisiPanel = activeTab === 'divisions' || activeTab === 'programs' || activeTab === 'documentation';
-// 1. Set 5 item per halaman untuk admin
+
+  // 1. Set 5 item per halaman untuk admin
   const [adminSearch, setAdminSearch] = useState('');
   const [adminPage, setAdminPage] = useState(1);
   const adminItemsPerPage = 5;
@@ -188,6 +190,23 @@ export const AdminDashboard: React.FC = () => {
   const handleSearchChange = (val: string) => {
     setAdminSearch(val);
     setAdminPage(1);
+  };
+
+  // Tutup panel otomatis di layar HP saat admin memilih menu
+  // Tutup panel otomatis di layar HP saat admin memilih menu mandiri,
+  // tetapi BIARKAN TERBUKA jika menu tersebut memiliki sub-menu (Divisi, Proker, Dokumentasi)
+  const handleTabSwitch = (tab: TabType) => {
+    setActiveTab(tab);
+    setAdminSearch('');
+    setAdminPage(1);
+
+    // Cek apakah menu ini memiliki cabang pilihan divisi
+    const hasSubMenu = tab === 'divisions' || tab === 'programs' || tab === 'documentation';
+
+    // Hanya tutup panel di HP jika menu TIDAK memiliki cabang pilihan divisi
+    if (!hasSubMenu && window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
   };
 
   // 2. Program Kerja (5 item)
@@ -231,103 +250,290 @@ export const AdminDashboard: React.FC = () => {
   const paginatedBlogs = filteredBlogs.slice((adminPage - 1) * adminItemsPerPage, adminPage * adminItemsPerPage);
 
   return (
-<div className="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#121215] text-slate-800 dark:text-[#bebeca] transition-colors duration-300">{/* ========================================================
-          SIDEBAR KIRI: SUPERPANEL & DIVISIPANEL LENGKAP
+    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#121215] text-slate-800 dark:text-[#bebeca] transition-colors duration-300">
+      
+      {/* BACKDROP GELAP SAAT SIDEBAR DIBUKA DI HP */}
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden cursor-pointer"
+        />
+      )}
+
+      {/* ========================================================
+          SIDEBAR KIRI: TUNGGAL & BERSIH (RESPONSIF BISA DITUTUP)
          ======================================================== */}
-      <aside className="w-full lg:w-72 lg:min-h-screen border-r border-slate-200 dark:border-[#3c3c44] bg-white dark:bg-[#16161b] p-5 flex flex-col justify-between shrink-0 transition-colors duration-300">
+      {/* ========================================================
+          SIDEBAR KIRI: STRUKTUR TREE ACCORDION NAVIGASI
+         ======================================================== */}
+      <aside
+        className={`fixed lg:static top-0 left-0 z-50 h-full min-h-screen border-r border-slate-200 dark:border-[#3c3c44] bg-white dark:bg-[#16161b] flex flex-col justify-between shrink-0 transition-all duration-300 ease-in-out ${
+          isSidebarOpen
+            ? 'w-72 p-5 translate-x-0 opacity-100 shadow-2xl lg:shadow-none'
+            : '-translate-x-full lg:translate-x-0 lg:w-0 lg:p-0 lg:border-none lg:overflow-hidden opacity-0 pointer-events-none'
+        }`}
+      >
         <div className="space-y-6">
           
-          {/* Logo & Info Admin + TOMBOL SWITCH TEMA */}
+          {/* Header Sidebar: Logo & Tombol Tutup */}
           <div className="flex items-start justify-between gap-2">
             <div>
               <Link to="/" className="text-xs text-slate-500 dark:text-[#bebeca]/60 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition-colors mb-2">
                 <ArrowLeft size={13} /> Ke Website Publik
               </Link>
-              <h1 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight leading-snug">HMIF Admin Panel</h1>
+              <h1 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight leading-snug">HMIF CMS Panel</h1>
               <p className="text-[11px] font-mono text-slate-500 dark:text-[#bebeca]/60">Login: @{adminUsername}</p>
             </div>
 
-            {/* Tombol Switch Tema */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-2.5 rounded-xl border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#232329] hover:bg-slate-100 dark:hover:bg-[#3c3c44] shadow-sm transition-all cursor-pointer shrink-0"
-              title={isDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap"}
-              aria-label="Toggle Theme"
-            >
-              {isDarkMode ? (
-                <Sun size={16} className="text-amber-400" />
-              ) : (
-                <Moon size={16} className="text-slate-700" />
-              )}
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-xl border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#232329] hover:bg-slate-100 dark:hover:bg-[#3c3c44] shadow-sm transition-all cursor-pointer"
+                title={isDarkMode ? "Ganti ke Mode Terang" : "Ganti ke Mode Gelap"}
+              >
+                {isDarkMode ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} className="text-slate-700" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(false)}
+                className="p-2 rounded-xl border border-slate-300 dark:border-[#3c3c44] text-slate-700 dark:text-[#bebeca] lg:hidden hover:bg-slate-100 dark:hover:bg-[#232329]"
+                title="Tutup Panel"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
-          {/* SUPERPANEL NAVIGASI UTAMA (MENGGUNAKAN SEMUA IKON DAN SETACTIVETAB) */}
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-[#bebeca]/50 block px-2 mb-1.5">
-              Superpanel
+          {/* ========================================================
+              TREE MENU NAVIGASI (ACCORDION OTOMATIS)
+             ======================================================== */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-[#bebeca]/50 block px-2 mb-2">
+              Menu Navigasi
             </span>
-            {[
-              { id: 'settings', label: 'Pengaturan & Warna', icon: <Palette size={15}/> },
-              { id: 'divisions', label: 'Divisi & Anggota', icon: <Layers size={15}/> },
-              { id: 'programs', label: 'Program Kerja', icon: <Calendar size={15}/> },
-              { id: 'documentation', label: 'Dokumentasi', icon: <Camera size={15}/> },
-              { id: 'announcements', label: 'Pengumuman', icon: <Bell size={15}/> },
-              { id: 'competitions', label: 'Kompetisi', icon: <Trophy size={15}/> },
-              { id: 'blogs', label: 'Blog & Edukasi', icon: <BookOpen size={15}/> },
-            ].map((tab) => (
+
+            {/* 1. Pengaturan & Warna (Tanpa Tree) */}
+            <button
+              type="button"
+              onClick={() => handleTabSwitch('settings')}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                activeTab === 'settings'
+                  ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                  : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+              }`}
+            >
+              <Palette size={15} />
+              <span>Pengaturan &amp; Warna</span>
+            </button>
+
+            {/* 2. Divisi & Anggota (Tree Dropdown Seluruh Divisi) */}
+            <div className="space-y-1">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
-                  activeTab === tab.id
+                type="button"
+                onClick={() => handleTabSwitch('divisions')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  activeTab === 'divisions'
                     ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
                     : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
                 }`}
               >
-                {tab.icon}
-                <span>{tab.label}</span>
+                <div className="flex items-center gap-2.5">
+                  <Layers size={15} />
+                  <span>Divisi &amp; Anggota</span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    activeTab === 'divisions' ? 'rotate-0' : '-rotate-90 opacity-40'
+                  }`}
+                />
               </button>
-            ))}
-          </div>
 
-          {/* DIVISIPANEL (HANYA MUNCUL DI TAB DIVISI, PROKER, & DOKUMENTASI) */}
-          {showDivisiPanel && (
-            <div className="space-y-1 pt-4 border-t border-slate-300 dark:border-[#3c3c44]">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-[#bebeca]/50 block px-2 mb-1.5">
-                Pilih Divisi
-              </span>
-              <div className="space-y-1 max-h-70 overflow-y-auto pr-1">
-                {divisions.map((d) => (
-                  <button
-                    key={d.slug}
-                    onClick={() => setSelectedDivSlug(d.slug)}
-                    className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-colors truncate cursor-pointer ${
-                      selectedDivSlug === d.slug
-                        ? 'bg-slate-300 dark:bg-[#3c3c44] text-slate-900 dark:text-white font-bold border-l-2 border-slate-900 dark:border-[#bebeca]'
-                        : 'text-slate-600 dark:text-[#bebeca]/70 hover:bg-slate-200 dark:hover:bg-[#232329]'
-                    }`}
-                    title={d.name}
-                  >
-                    {d.shortName}
-                  </button>
-                ))}
-              </div>
+              {/* Sub-menu Seluruh Divisi (Hanya Buka Saat Divisi & Anggota Aktif) */}
+              {activeTab === 'divisions' && (
+                <div className="pl-4 pr-1 py-1 space-y-0.5 border-l-2 border-slate-300 dark:border-[#3c3c44] ml-4 transition-all">
+                  {divisions.map((d) => (
+                    <button
+                      key={d.slug}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDivSlug(d.slug);
+                        setAdminPage(1);
+                        if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition-colors truncate cursor-pointer flex items-center gap-1.5 ${
+                        selectedDivSlug === d.slug
+                          ? 'bg-slate-200 dark:bg-[#3c3c44] text-slate-950 dark:text-white font-bold'
+                          : 'text-slate-600 dark:text-[#bebeca]/70 hover:bg-slate-100 dark:hover:bg-[#232329]'
+                      }`}
+                      title={d.name}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 shrink-0" />
+                      <span className="truncate">{d.shortName}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+
+            {/* 3. Program Kerja (Tree Dropdown Seluruh Divisi) */}
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('programs')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  activeTab === 'programs'
+                    ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                    : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Calendar size={15} />
+                  <span>Program Kerja</span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    activeTab === 'programs' ? 'rotate-0' : '-rotate-90 opacity-40'
+                  }`}
+                />
+              </button>
+
+              {/* Sub-menu Seluruh Divisi (Hanya Buka Saat Program Kerja Aktif) */}
+              {activeTab === 'programs' && (
+                <div className="pl-4 pr-1 py-1 space-y-0.5 border-l-2 border-slate-300 dark:border-[#3c3c44] ml-4 transition-all">
+                  {divisions.map((d) => (
+                    <button
+                      key={d.slug}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDivSlug(d.slug);
+                        setAdminPage(1);
+                        if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition-colors truncate cursor-pointer flex items-center gap-1.5 ${
+                        selectedDivSlug === d.slug
+                          ? 'bg-slate-200 dark:bg-[#3c3c44] text-slate-950 dark:text-white font-bold'
+                          : 'text-slate-600 dark:text-[#bebeca]/70 hover:bg-slate-100 dark:hover:bg-[#232329]'
+                      }`}
+                      title={d.name}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 shrink-0" />
+                      <span className="truncate">{d.shortName}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 4. Dokumentasi (Tree Dropdown Seluruh Divisi) */}
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('documentation')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  activeTab === 'documentation'
+                    ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                    : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Camera size={15} />
+                  <span>Dokumentasi</span>
+                </div>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${
+                    activeTab === 'documentation' ? 'rotate-0' : '-rotate-90 opacity-40'
+                  }`}
+                />
+              </button>
+
+              {/* Sub-menu Seluruh Divisi (Hanya Buka Saat Dokumentasi Aktif) */}
+              {activeTab === 'documentation' && (
+                <div className="pl-4 pr-1 py-1 space-y-0.5 border-l-2 border-slate-300 dark:border-[#3c3c44] ml-4 transition-all">
+                  {divisions.map((d) => (
+                    <button
+                      key={d.slug}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDivSlug(d.slug);
+                        setAdminPage(1);
+                        if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition-colors truncate cursor-pointer flex items-center gap-1.5 ${
+                        selectedDivSlug === d.slug
+                          ? 'bg-slate-200 dark:bg-[#3c3c44] text-slate-950 dark:text-white font-bold'
+                          : 'text-slate-600 dark:text-[#bebeca]/70 hover:bg-slate-100 dark:hover:bg-[#232329]'
+                      }`}
+                      title={d.name}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60 shrink-0" />
+                      <span className="truncate">{d.shortName}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 5. Pengumuman */}
+            <button
+              type="button"
+              onClick={() => handleTabSwitch('announcements')}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                activeTab === 'announcements'
+                  ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                  : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+              }`}
+            >
+              <Bell size={15} />
+              <span>Pengumuman</span>
+            </button>
+
+            {/* 6. Kompetisi */}
+            <button
+              type="button"
+              onClick={() => handleTabSwitch('competitions')}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                activeTab === 'competitions'
+                  ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                  : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+              }`}
+            >
+              <Trophy size={15} />
+              <span>Kompetisi</span>
+            </button>
+
+            {/* 7. Blog & Edukasi */}
+            <button
+              type="button"
+              onClick={() => handleTabSwitch('blogs')}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                activeTab === 'blogs'
+                  ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md font-bold'
+                  : 'text-slate-700 dark:text-[#bebeca] hover:bg-slate-200 dark:hover:bg-[#232329]'
+              }`}
+            >
+              <BookOpen size={15} />
+              <span>Blog &amp; Edukasi</span>
+            </button>
+
+          </div>
 
         </div>
 
         {/* Footer Sidebar: Ganti Akun & Logout */}
-        <div className="pt-4 border-t border-slate-300 dark:border-[#3c3c44] flex items-center justify-between gap-2">
+        <div className="pt-4 border-t border-slate-200 dark:border-[#3c3c44] flex items-center justify-between gap-2">
           <button
+            type="button"
             onClick={() => setShowAccountModal(true)}
             className="flex-1 py-2 px-2.5 rounded-xl border border-slate-300 dark:border-[#3c3c44] hover:border-slate-500 dark:hover:border-[#bebeca] text-[11px] font-semibold text-slate-700 dark:text-[#bebeca] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <KeyRound size={13} /> Akun
           </button>
           <button
+            type="button"
             onClick={() => { logout(); navigate('/admin/login'); }}
             className="py-2 px-3 rounded-xl bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-600 dark:text-red-300 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer"
           >
@@ -335,12 +541,31 @@ export const AdminDashboard: React.FC = () => {
           </button>
         </div>
       </aside>
+
       {/* ========================================================
-          KONTEN UTAMA KANAN
+          KONTEN UTAMA KANAN (DENGAN TOMBOL HAMBURGER DI ATASNYA)
          ======================================================== */}
       <main className="flex-1 p-6 lg:p-10 max-h-screen overflow-y-auto bg-slate-100/70 dark:bg-transparent">
-        <div className="max-w-5xl mx-auto space-y-8">{/* TAB 1: PENGATURAN TEKS, WARNA, LOGO, DAN MISI */}
-{/* TAB 1: PENGATURAN TEKS, WARNA, LOGO, DAN MISI */}
+        <div className="max-w-5xl mx-auto space-y-6">
+
+          {/* BARIS TOMBOL HAMBURGER TOGGLE PANEL */}
+          <div className="flex items-center justify-between pb-4 border-b border-slate-300/80 dark:border-[#3c3c44]">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2.5 rounded-xl border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#16161b] hover:bg-slate-100 dark:hover:bg-[#232329] text-slate-800 dark:text-white shadow-sm transition-all cursor-pointer flex items-center justify-center shrink-0"
+              title={isSidebarOpen ? "Tutup Panel" : "Buka Panel"}
+              aria-label={isSidebarOpen ? "Tutup Panel" : "Buka Panel"}
+            >
+              {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+
+            <span className="text-xs font-mono text-slate-500 dark:text-[#bebeca]/60">
+              {settings.cabinet_name} • {settings.period}
+            </span>
+          </div>
+
+          {/* TAB 1: PENGATURAN TEKS, WARNA, LOGO, DAN MISI */}
           {activeTab === 'settings' && (
             <div className="liquid-glass rounded-3xl p-6 lg:p-8 border border-slate-200 dark:border-[#3c3c44] shadow-sm dark:shadow-2xl space-y-6">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kustomisasi Tampilan &amp; Konten Website</h2>
@@ -479,7 +704,7 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* TAB 2: DIVISI & ANGGOTA (DENGAN UPLOAD FOTO PROFIL LOKAL) */}
-                    {activeTab === 'divisions' && (
+          {activeTab === 'divisions' && (
             <div className="space-y-6">
               
               {/* KOTAK INFORMASI NAMA & DESKRIPSI DIVISI */}
@@ -510,7 +735,6 @@ export const AdminDashboard: React.FC = () => {
                   </button>
                 </div>
               </div>
-
 
               {/* Pimpinan */}
               <div className="liquid-glass p-6 rounded-2xl border border-[#3c3c44] space-y-4">
@@ -578,7 +802,6 @@ export const AdminDashboard: React.FC = () => {
                         <button onClick={() => { setIsEditingLeader(null); setMemberIndex(idx); setMemberForm({...m}); setShowMemberModal(true); }} className="p-1.5 hover:bg-[#3c3c44] rounded">
                           <Edit3 size={14}/>
                         </button>
-                        {/* GANTI TOMBOL TEMPAT SAMPAH ANGGOTA INI: */}
                         <button 
                           type="button"
                           onClick={() => setDeleteTarget({ 
@@ -599,7 +822,8 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
           )}
-{/* TAB 3: PROGRAM KERJA */}
+
+          {/* TAB 3: PROGRAM KERJA */}
           {activeTab === 'programs' && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -920,6 +1144,7 @@ export const AdminDashboard: React.FC = () => {
           )}
         </div>
       </main>
+
       {/* ========================================================
           MODAL FORM EDIT INFORMASI DIVISI (NAMA & DESKRIPSI)
          ======================================================== */}
@@ -992,7 +1217,8 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
-{/* ========================================================
+
+      {/* ========================================================
           MODAL FORM TAMBAH / EDIT DOKUMENTASI KEGIATAN
          ======================================================== */}
       {showDocModal && (
@@ -1006,11 +1232,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveDocumentation} className="space-y-4">
-              
-              {/* 1. LAGI KEGIATAN APA? */}
               <div>
                 <label className="block text-xs font-mono mb-1 text-white font-bold">1. Lagi Kegiatan Apa? (Nama Kegiatan / Proker)</label>
-                {/* Pilihan: Pilih dari proker yang ada atau tulis baru */}
                 {!isNewDocActivity && (
                   <input
                     type="text"
@@ -1064,7 +1287,6 @@ export const AdminDashboard: React.FC = () => {
                 )}
               </div>
 
-              {/* 2. DI TANGGAL BERAPA? */}
               <div>
                 <label className="block text-xs font-mono mb-1 text-white font-bold">2. Di Tanggal Berapa? (Waktu Pelaksanaan)</label>
                 <input
@@ -1077,7 +1299,6 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              {/* 3. DESKRIPSI KEGIATAN */}
               <div>
                 <label className="block text-xs font-mono mb-1 text-white font-bold">3. Deskripsi / Rekap Ringkas Kegiatan</label>
                 <textarea
@@ -1090,11 +1311,8 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              {/* 4. UPLOAD FOTO (LOKAL / URL) */}
               <div className="space-y-2 pt-1">
                 <label className="block text-xs font-mono mb-1 text-white font-bold">4. Galeri Foto Dokumentasi (Upload File / URL)</label>
-                
-                {/* Grid Foto yang Sudah Ditambahkan */}
                 {docForm.photoUrls.length > 0 && (
                   <div className="grid grid-cols-4 gap-2 mb-2 p-2 border border-[#3c3c44] rounded-xl bg-[#19191d]">
                     {docForm.photoUrls.map((url, i) => (
@@ -1113,7 +1331,6 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 )}
 
-                {/* Upload dari Perangkat */}
                 <label className="cursor-pointer w-full py-2.5 bg-[#232329] hover:bg-[#3c3c44] border border-[#3c3c44] rounded-xl text-xs text-white flex items-center justify-center gap-2 transition-colors">
                   <Upload size={14} /> Pilih Foto dari Komputer / HP
                   <input
@@ -1124,7 +1341,6 @@ export const AdminDashboard: React.FC = () => {
                   />
                 </label>
 
-                {/* Atau Tambah via Link URL */}
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -1148,7 +1364,6 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tombol Simpan */}
               <div className="flex justify-end gap-2 pt-4 border-t border-[#3c3c44]">
                 <button
                   type="button"
@@ -1197,7 +1412,6 @@ export const AdminDashboard: React.FC = () => {
                 <input type="text" value={memberForm.nim || ''} onChange={(e) => setMemberForm({...memberForm, nim: e.target.value})} className="w-full border border-[#3c3c44] bg-[#19191d] p-2.5 rounded-xl text-xs text-white" />
               </div>
 
-              {/* Upload Foto Profil (Lokal & URL) */}
               <div className="space-y-2 pt-1">
                 <label className="block text-xs font-mono mb-1 text-white">Foto Profil (Upload File atau URL)</label>
                 {memberForm.imageUrl && (
@@ -1412,7 +1626,10 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
-      {/* MODAL KONFIRMASI HAPUS */}
+
+      {/* ========================================================
+          MODAL KONFIRMASI HAPUS
+         ======================================================== */}
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="liquid-glass rounded-2xl p-6 max-w-sm w-full border border-red-500/40 text-center space-y-4 shadow-2xl">
@@ -1455,6 +1672,5 @@ export const AdminDashboard: React.FC = () => {
       )}
 
     </div>
-    
   );
 };

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 import { divisionsData as initialDivisionsData } from '../data/divisionsData';
 import type { 
   DivisionDetail, Member, DivisionProker, 
@@ -21,6 +20,7 @@ interface DataContextType {
   logout: () => void;
   changeCredentials: (newUsername: string, newPassword: string) => Promise<void>;
   updateSettings: (newSettings: Partial<SiteSettings>) => Promise<void>;
+  updateDivisionInfo: (slug: string, info: { name: string; shortName: string; about: string }) => Promise<void>;
   updateLeader: (slug: string, leader: Member) => Promise<void>;
   updateCoLeader: (slug: string, coLeader?: Member) => Promise<void>;
   addMember: (slug: string, member: Member) => Promise<void>;
@@ -35,7 +35,6 @@ interface DataContextType {
   deleteCompetition: (id: string) => Promise<void>;
   saveBlog: (data: Partial<BlogPost>) => Promise<void>;
   deleteBlog: (id: string) => Promise<void>;
-  updateDivisionInfo: (slug: string, info: { name: string; shortName: string; about: string }) => Promise<void>;
 }
 
 const STRICT_DIVISION_ORDER = [
@@ -84,6 +83,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
+const TOKEN_KEY = 'hmif_serverless_token';
+const USERNAME_KEY = 'hmif_serverless_user';
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [divisions, setDivisions] = useState<DivisionDetail[]>(() => enforceDivisionOrder(initialDivisionsData));
@@ -93,34 +94,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => localStorage.getItem('hmif_theme') !== 'light');
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('hmif_admin_session') === 'true');
-  const [adminUsername, setAdminUsername] = useState('admin');
-  // Update Nama Lengkap, Nama Singkat, dan Deskripsi Divisi
-const updateDivisionInfo = async (slug: string, info: { name: string; shortName: string; about: string }) => {
-  const target = divisions.find((d) => d.slug === slug);
-  if (!target) return;
-
-  const updated = {
-    ...target,
-    name: info.name.trim(),
-    shortName: info.shortName.trim(),
-    about: info.about.trim(),
-  };
-
-  // Update di state frontend
-  setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-
-  // Sync langsung ke Supabase
-  try {
-    await supabase.from('divisions').update({
-      name: updated.name,
-      short_name: updated.shortName,
-      about: updated.about,
-    }).eq('slug', slug);
-  } catch (err) {
-    console.error('Gagal update info divisi ke Supabase:', err);
-  }
-};
+  
+  const [adminToken, setAdminToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+  const [adminUsername, setAdminUsername] = useState<string>(() => localStorage.getItem(USERNAME_KEY) || 'admin');
+  const isAdmin = Boolean(adminToken);
 
   const applyThemeColors = useCallback((dark: boolean, currentSettings: SiteSettings) => {
     const root = document.documentElement;
@@ -144,18 +121,20 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
     });
   };
 
+  // 1. AMBIL SELURUH DATA DARI SERVERLESS API (/api/data)
   const fetchAllData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data: setRes } = await supabase.from('site_settings').select('*').eq('id', 1).single();
-      if (setRes) {
-        setSettings(setRes);
-        applyThemeColors(isDarkMode, setRes);
+      const res = await fetch('/api/data');
+      if (!res.ok) throw new Error('Gagal mengambil data dari serverless API');
+      
+      const json = await res.json();
+      if (json.settings) {
+        setSettings(json.settings);
+        applyThemeColors(isDarkMode, json.settings);
       }
-
-      const { data: divRes } = await supabase.from('divisions').select('*').order('order_index', { ascending: true });
-      if (divRes && divRes.length > 0) {
-        const formatted = divRes.map((r) => ({
+      if (json.divisions && json.divisions.length > 0) {
+        const formatted = json.divisions.map((r: Record<string, unknown>) => ({
           slug: r.slug,
           name: r.name,
           shortName: r.short_name,
@@ -167,17 +146,11 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
         }));
         setDivisions(enforceDivisionOrder(formatted));
       }
-
-      const { data: annRes } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-      if (annRes) setAnnouncements(annRes);
-
-      const { data: compRes } = await supabase.from('competitions').select('*').order('deadline', { ascending: true });
-      if (compRes) setCompetitions(compRes);
-
-      const { data: blogRes } = await supabase.from('blogs').select('*').order('created_at', { ascending: false });
-      if (blogRes) setBlogs(blogRes);
+      if (json.announcements) setAnnouncements(json.announcements);
+      if (json.competitions) setCompetitions(json.competitions);
+      if (json.blogs) setBlogs(json.blogs);
     } catch (err) {
-      console.error('Error fetching Supabase data:', err);
+      console.error('Fetch Serverless Error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -187,13 +160,36 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
     fetchAllData();
   }, [fetchAllData]);
 
+  // Helper Pengiriman Mutasi Serverless
+  const sendServerlessMutation = async (type: string, payload: unknown) => {
+    try {
+      await fetch('/api/data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({ type, payload }),
+      });
+    } catch (err) {
+      console.error('Mutation Error:', err);
+    }
+  };
+
+  // 2. LOGIN ADMIN VIA SERVERLESS (/api/auth)
   const login = async (user: string, pass: string): Promise<boolean> => {
     try {
-      const { data } = await supabase.from('admin_creds').select('username, password').eq('id', 1).single();
-      if (data && data.username === user.trim() && data.password === pass) {
-        setIsAdmin(true);
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'login', username: user, password: pass }),
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        setAdminToken(data.token);
         setAdminUsername(data.username);
-        localStorage.setItem('hmif_admin_session', 'true');
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USERNAME_KEY, data.username);
         return true;
       }
       return false;
@@ -203,49 +199,53 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
   };
 
   const logout = () => {
-    setIsAdmin(false);
-    localStorage.removeItem('hmif_admin_session');
+    setAdminToken(null);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USERNAME_KEY);
   };
 
   const changeCredentials = async (newUsername: string, newPassword: string) => {
-    await supabase.from('admin_creds').update({ username: newUsername.trim(), password: newPassword }).eq('id', 1);
-    setAdminUsername(newUsername.trim());
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify({
+        action: 'change-credentials',
+        newUsername,
+        newPassword,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      setAdminUsername(data.username);
+      localStorage.setItem(USERNAME_KEY, data.username);
+    }
   };
 
+  // 3. MUTASI DATA TERPUSAT
   const updateSettings = async (newSettings: Partial<SiteSettings>) => {
     const merged = { ...settings, ...newSettings };
     setSettings(merged);
     applyThemeColors(isDarkMode, merged);
-    await supabase.from('site_settings').update(newSettings).eq('id', 1);
-  };
-// Helper sinkronisasi divisi ke Supabase dengan proteksi error
-  const syncDivisionToSupabase = async (updated: DivisionDetail) => {
-    try {
-      const { error } = await supabase
-        .from('divisions')
-        .update({
-          leader: updated.leader,
-          co_leader: updated.coLeader || null,
-          members: updated.members || [],
-          programs: updated.programs || [],
-        })
-        .eq('slug', updated.slug);
-
-      if (error) {
-        console.error('Supabase update error:', error.message);
-      }
-    } catch (err) {
-      console.error('Gagal sinkronisasi ke Supabase:', err);
-    }
+    await sendServerlessMutation('update-settings', newSettings);
   };
 
-  // CRUD Mahasiswa & Pimpinan (Fix Local State & Supabase Update)
+  const updateDivisionInfo = async (slug: string, info: { name: string; shortName: string; about: string }) => {
+    const target = divisions.find((d) => d.slug === slug);
+    if (!target) return;
+    const updated = { ...target, name: info.name.trim(), shortName: info.shortName.trim(), about: info.about.trim() };
+    setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
+    await sendServerlessMutation('update-division', { slug, data: updated });
+  };
+
   const updateLeader = async (slug: string, leader: Member) => {
     const target = divisions.find((d) => d.slug === slug);
     if (!target) return;
     const updated = { ...target, leader };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
   const updateCoLeader = async (slug: string, coLeader?: Member) => {
@@ -253,7 +253,7 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
     if (!target) return;
     const updated = { ...target, coLeader };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
   const addMember = async (slug: string, member: Member) => {
@@ -261,7 +261,7 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
     if (!target) return;
     const updated = { ...target, members: [...target.members, member] };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
   const updateMember = async (slug: string, index: number, member: Member) => {
@@ -271,26 +271,24 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
     newMembers[index] = member;
     const updated = { ...target, members: newMembers };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
-  // FIX DELETE MEMBER AGAR BERFUNGSI SEMPURNA DI LOCAL (NPM RUN DEV)
   const deleteMember = async (slug: string, index: number) => {
     const target = divisions.find((d) => d.slug === slug);
     if (!target) return;
     const newMembers = target.members.filter((_, i) => i !== index);
     const updated = { ...target, members: newMembers };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
-  // CRUD Program Kerja
   const addProgram = async (slug: string, program: DivisionProker) => {
     const target = divisions.find((d) => d.slug === slug);
     if (!target) return;
     const updated = { ...target, programs: [...target.programs, program] };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
   const updateProgram = async (slug: string, index: number, program: DivisionProker) => {
@@ -300,61 +298,45 @@ const updateDivisionInfo = async (slug: string, info: { name: string; shortName:
     newPrograms[index] = program;
     const updated = { ...target, programs: newPrograms };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
-  // FIX DELETE PROKER AGAR BERFUNGSI SEMPURNA DI LOCAL (NPM RUN DEV)
   const deleteProgram = async (slug: string, index: number) => {
     const target = divisions.find((d) => d.slug === slug);
     if (!target) return;
     const newPrograms = target.programs.filter((_, i) => i !== index);
     const updated = { ...target, programs: newPrograms };
     setDivisions((prev) => enforceDivisionOrder(prev.map((d) => (d.slug === slug ? updated : d))));
-    await syncDivisionToSupabase(updated);
+    await sendServerlessMutation('update-division', { slug, data: updated });
   };
 
   const saveAnnouncement = async (item: Partial<Announcement>) => {
-    if (item.id) {
-      await supabase.from('announcements').update(item).eq('id', item.id);
-    } else {
-      await supabase.from('announcements').insert([item]);
-    }
-    const { data } = await supabase.from('announcements').select('*').order('created_at', { ascending: false });
-    if (data) setAnnouncements(data);
+    await sendServerlessMutation('save-announcement', item);
+    await fetchAllData();
   };
 
   const deleteAnnouncement = async (id: string) => {
-    await supabase.from('announcements').delete().eq('id', id);
+    await sendServerlessMutation('delete-announcement', { id });
     setAnnouncements((prev) => prev.filter((a) => a.id !== id));
   };
 
   const saveCompetition = async (item: Partial<Competition>) => {
-    if (item.id) {
-      await supabase.from('competitions').update(item).eq('id', item.id);
-    } else {
-      await supabase.from('competitions').insert([item]);
-    }
-    const { data } = await supabase.from('competitions').select('*').order('deadline', { ascending: true });
-    if (data) setCompetitions(data);
+    await sendServerlessMutation('save-competition', item);
+    await fetchAllData();
   };
 
   const deleteCompetition = async (id: string) => {
-    await supabase.from('competitions').delete().eq('id', id);
+    await sendServerlessMutation('delete-competition', { id });
     setCompetitions((prev) => prev.filter((c) => c.id !== id));
   };
 
   const saveBlog = async (item: Partial<BlogPost>) => {
-    if (item.id) {
-      await supabase.from('blogs').update(item).eq('id', item.id);
-    } else {
-      await supabase.from('blogs').insert([item]);
-    }
-    const { data } = await supabase.from('blogs').select('*').order('created_at', { ascending: false });
-    if (data) setBlogs(data);
+    await sendServerlessMutation('save-blog', item);
+    await fetchAllData();
   };
 
   const deleteBlog = async (id: string) => {
-    await supabase.from('blogs').delete().eq('id', id);
+    await sendServerlessMutation('delete-blog', { id });
     setBlogs((prev) => prev.filter((b) => b.id !== id));
   };
 
