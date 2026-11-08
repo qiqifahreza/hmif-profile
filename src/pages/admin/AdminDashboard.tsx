@@ -599,10 +599,27 @@ export const AdminDashboard: React.FC = () => {
                 <div className="p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b] space-y-3">
                   <label className="block text-xs font-mono font-bold text-slate-800 dark:text-white">Logo Organisasi (Upload File atau URL)</label>
                   <div className="flex items-center gap-4">
+                    {/* PREVIEW LOGO DENGAN TOMBOL SILANG DI LUAR LINGKARAN */}
                     {siteForm.logo_url && (
-                      <div className="relative w-14 h-14 rounded-full overflow-hidden border border-slate-300 dark:border-[#bebeca] bg-slate-100 dark:bg-black p-1 shrink-0">
-                        <img src={siteForm.logo_url} alt="Logo" className="w-full h-full object-contain" />
-                        <button type="button" onClick={() => setSiteForm({...siteForm, logo_url: ''})} className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-0.5"><X size={10}/></button>
+                      <div className="relative w-14 h-14 shrink-0">
+                        {/* Lingkaran Logo */}
+                        <div className="w-14 h-14 rounded-full overflow-hidden border border-slate-300 dark:border-[#bebeca] bg-slate-100 dark:bg-black p-1 shadow-sm">
+                          <img
+                            src={siteForm.logo_url}
+                            alt="Logo"
+                            className="w-full h-full object-contain rounded-full"
+                          />
+                        </div>
+
+                        {/* Tombol Silang Merah Melayang di Luar Tepi Lingkaran */}
+                        <button
+                          type="button"
+                          onClick={() => setSiteForm({ ...siteForm, logo_url: '' })}
+                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center border-2 border-white dark:border-[#16161b] shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                          title="Hapus logo"
+                        >
+                          <X size={10} />
+                        </button>
                       </div>
                     )}
                     <label className="cursor-pointer px-4 py-2 bg-slate-100 dark:bg-[#232329] hover:bg-slate-200 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-800 dark:text-white flex items-center gap-2 transition-colors">
@@ -1414,10 +1431,28 @@ export const AdminDashboard: React.FC = () => {
 
               <div className="space-y-2 pt-1">
                 <label className="block text-xs font-mono mb-1 text-white">Foto Profil (Upload File atau URL)</label>
+                {/* PREVIEW FOTO DENGAN TOMBOL SILANG DI LUAR LINGKARAN */}
                 {memberForm.imageUrl && (
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[#bebeca] mx-auto shadow-md">
-                    <img src={memberForm.imageUrl} alt="" className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => setMemberForm({...memberForm, imageUrl: ''})} className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"><X size={10}/></button>
+                  <div className="relative w-20 h-20 mx-auto mb-3">
+                    {/* Lingkaran Foto yang Terpotong Rapi */}
+                    <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-400 dark:border-[#bebeca] shadow-md bg-slate-100 dark:bg-[#19191d]">
+                      <img
+                        src={memberForm.imageUrl}
+                        alt="Preview"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Tombol Silang Merah Melayang di Luar Tepi Lingkaran */}
+                    <button
+                      type="button"
+                      onClick={() => setMemberForm({ ...memberForm, imageUrl: '' })}
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center border-2 border-white dark:border-[#19191d] shadow-lg transition-transform hover:scale-110 cursor-pointer z-10"
+                      title="Hapus foto"
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
                 )}
                 <label className="cursor-pointer w-full py-2 bg-[#232329] hover:bg-[#3c3c44] border border-[#3c3c44] rounded-xl text-xs text-white flex items-center justify-center gap-2">
