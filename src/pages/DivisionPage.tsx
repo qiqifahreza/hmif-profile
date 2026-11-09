@@ -4,7 +4,7 @@ import { User, ShieldCheck, Calendar, ArrowLeft } from 'lucide-react';
 import type { Member } from '../types';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
-import { MemberSkeleton, CardSkeleton } from '../components/Skeleton';
+import { MemberSkeleton } from '../components/Skeleton';
 
 const MemberAvatar: React.FC<{ member: Member; isLeader: boolean }> = ({ member, isLeader }) => {
   const [hasError, setHasError] = useState(false);
