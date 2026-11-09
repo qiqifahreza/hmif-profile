@@ -162,3 +162,32 @@ html.dark {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ========================================================
+   ANIMASI FADE-DOWN (MELUNCUR HALUS DARI ATAS KE BAWAH)
+   ======================================================== */
+@keyframes fade-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-down {
+  animation: fade-down 0.5s cubic-bezier(0.1, 3, 0.5, 1) both;
+}
+
+/* Variasi jeda bertahap (Staggered Delay) jika diperlukan */
+.delay-100 {
+  animation-delay: 100ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}

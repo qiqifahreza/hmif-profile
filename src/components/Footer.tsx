@@ -1,6 +1,7 @@
 import React from 'react';
 
-const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 20, className = '' }) => (
+// Ikon SVG Mandiri
+const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18, className = '' }) => (
   <svg
     width={size}
     height={size}
@@ -17,7 +18,7 @@ const GithubIcon: React.FC<{ size?: number; className?: string }> = ({ size = 20
   </svg>
 );
 
-const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size = 20, className = '' }) => (
+const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size = 18, className = '' }) => (
   <svg
     width={size}
     height={size}
@@ -37,40 +38,48 @@ const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size =
 
 export const Footer: React.FC = () => {
   return (
-    <footer id="kontak" className="bg-[#141417] border-t border-primary text-secondary py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+    <footer
+      id="kontak"
+      className="bg-slate-100 dark:bg-[#0c0c0f] border-t border-slate-300 dark:border-[#3c3c44] text-slate-600 dark:text-[#bebeca] py-6 sm:py-10 transition-colors duration-300"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 text-center sm:text-left">
+        
+        {/* Identitas Organisasi */}
         <div>
-          <h4 className="text-white font-bold text-lg mb-1">
+          <h4 className="text-slate-900 dark:text-white font-bold text-sm sm:text-base leading-snug">
             Himpunan Informatika UISI - Kabinet Samvaya
           </h4>
-          <p className="text-sm text-secondary/80">
-            Universitas Internasional Semen Indonesia (UISI) • Kompleks PT Semen Indonesia, Gresik
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-[#bebeca]/80 mt-1">
+            Universitas Internasional Semen Indonesia • PT Semen Indonesia Gresik
           </p>
         </div>
 
-        <div className="flex space-x-6 text-secondary">
+        {/* Ikon Sosial Media */}
+        <div className="flex items-center space-x-3 shrink-0">
           <a
             href="https://github.com"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-white transition-colors p-2 rounded-lg hover:bg-primary"
+            className="p-2 rounded-xl border border-slate-300 dark:border-[#3c3c44] hover:bg-slate-200 dark:hover:bg-[#232329] text-slate-700 dark:text-[#bebeca] hover:text-slate-950 dark:hover:text-white transition-all shadow-sm cursor-pointer"
             aria-label="GitHub"
           >
-            <GithubIcon size={20} />
+            <GithubIcon size={16} />
           </a>
           <a
             href="https://www.instagram.com/hmif.uisi?utm_source=ig_web_button_share_sheet&vrfl=ZDNlZDc0MzIxNw=="
             target="_blank"
             rel="noreferrer"
-            className="hover:text-white transition-colors p-2 rounded-lg hover:bg-primary"
+            className="p-2 rounded-xl border border-slate-300 dark:border-[#3c3c44] hover:bg-slate-200 dark:hover:bg-[#232329] text-slate-700 dark:text-[#bebeca] hover:text-slate-950 dark:hover:text-white transition-all shadow-sm cursor-pointer"
             aria-label="Instagram"
           >
-            <InstagramIcon size={20} />
+            <InstagramIcon size={16} />
           </a>
         </div>
       </div>
-      <div className="mt-8 text-center text-xs text-secondary/50">
-        &copy; {new Date().getFullYear()} HMIF UISI. All rights reserved.
+
+      {/* Copyright */}
+      <div className="mt-5 pt-4 border-t border-slate-200 dark:border-white/5 text-center text-[10px] sm:text-xs text-slate-400 dark:text-[#bebeca]/50 font-mono">
+        &copy; {new Date().getFullYear()} HIMATIF UISI. All rights reserved.
       </div>
     </footer>
   );

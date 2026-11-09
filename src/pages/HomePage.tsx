@@ -109,7 +109,7 @@ export const HomePage: React.FC = () => {
             &ldquo;{settings.vision}&rdquo;
           </p>
           <Link to="/tentang" className="inline-flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-secondary hover:underline">
-            <BookOpen size={15} /> Pelajari Misi &amp; Struktur Organisasi Lengkap <ArrowRight size={14} />
+            <BookOpen size={15} /> Lihat Struktur Lengkap <ArrowRight size={14} />
           </Link>
         </SpotlightCard>
       </section>

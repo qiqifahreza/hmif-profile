@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { 
   LogOut, Plus, Trash2, Edit3, ArrowLeft,
@@ -37,6 +37,12 @@ export const AdminDashboard: React.FC = () => {
   const [siteForm, setSiteForm] = useState<SiteSettings>(settings);
   const [newMissionItem, setNewMissionItem] = useState('');
 
+  // SINKRONKAN FORM OTOMATIS SAAT DATA SUPABASE SELESAI DIUNDUH
+  useEffect(() => {
+    if (settings) {
+      setSiteForm(settings);
+    }
+  }, [settings]);
   // Modals State
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [memberIndex, setMemberIndex] = useState<number | null>(null);
@@ -594,31 +600,19 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* 2. Upload Logo */}
+{/* 2. Upload Logo (Dibuat Responsif Flex-Wrap untuk Layar HP) */}
                 <div className="p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b] space-y-3">
-                  <label className="block text-xs font-mono font-bold text-slate-800 dark:text-white">Logo Organisasi (Upload File atau URL)</label>
-                  <div className="flex items-center gap-4">
-                    {/* PREVIEW LOGO DENGAN TOMBOL SILANG DI LUAR LINGKARAN */}
+                  <label className="block text-xs font-mono font-bold text-slate-800 dark:text-white">Pengaturan Logo</label>
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     {siteForm.logo_url && (
                       <div className="relative w-14 h-14 shrink-0">
                         {/* Lingkaran Logo */}
                         <div className="w-14 h-14 rounded-full overflow-hidden border border-slate-300 dark:border-[#bebeca] bg-slate-100 dark:bg-black p-1 shadow-sm">
-                          <img
-                            src={siteForm.logo_url}
-                            alt="Logo"
-                            className="w-full h-full object-contain rounded-full"
-                          />
+                          <img src={siteForm.logo_url} alt="Logo" className="w-full h-full object-contain rounded-full" />
                         </div>
-
-                        {/* Tombol Silang Merah Melayang di Luar Tepi Lingkaran */}
-                        <button
-                          type="button"
-                          onClick={() => setSiteForm({ ...siteForm, logo_url: '' })}
-                          className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center border-2 border-white dark:border-[#16161b] shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
-                          title="Hapus logo"
-                        >
-                          <X size={10} />
+                        {/* Tombol Silang */}
+                        <button type="button" onClick={() => setSiteForm({...siteForm, logo_url: ''})} className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center border-2 border-white dark:border-[#16161b] shadow-md transition-transform hover:scale-110 cursor-pointer z-10">
+                          <X size={10}/>
                         </button>
                       </div>
                     )}
@@ -627,9 +621,8 @@ export const AdminDashboard: React.FC = () => {
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, (base64) => setSiteForm({...siteForm, logo_url: base64}))} />
                     </label>
                   </div>
-                  <input type="text" placeholder="Atau masukkan tautan URL Logo (https://...)" value={siteForm.logo_url} onChange={(e) => setSiteForm({...siteForm, logo_url: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-slate-400" />
+                  <input type="text" placeholder="Atau masukkan tautan URL Logo (https://...)" value={siteForm.logo_url} onChange={(e) => setSiteForm({...siteForm, logo_url: e.target.value})} className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none" />
                 </div>
-
                 {/* 3. Teks Identitas */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
