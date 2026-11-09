@@ -4,6 +4,7 @@ import { User, ShieldCheck, Calendar, ArrowLeft } from 'lucide-react';
 import type { Member } from '../types';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
+import { MemberSkeleton, CardSkeleton } from '../components/Skeleton';
 
 const MemberAvatar: React.FC<{ member: Member; isLeader: boolean }> = ({ member, isLeader }) => {
   const [hasError, setHasError] = useState(false);
@@ -41,7 +42,7 @@ const MemberAvatar: React.FC<{ member: Member; isLeader: boolean }> = ({ member,
 
 export const DivisionPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { divisions } = useData();
+const { divisions, isLoading } = useData();
   const division = divisions.find((d) => d.slug === slug);
 
   if (!division) {
@@ -98,27 +99,39 @@ export const DivisionPage: React.FC = () => {
           {division.about}
         </p>
       </SpotlightCard>
+{/* Pimpinan */}
+   <div>
+     <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Pimpinan Divisi</h2>
+     <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
+     {isLoading ? (
+       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+         <MemberSkeleton />
+         <MemberSkeleton />
+       </div>
+     ) : (
+       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+         {renderMemberCard(division.leader, true)}
+         {division.coLeader && renderMemberCard(division.coLeader, true)}
+       </div>
+     )}
+   </div>
 
-      {/* Pimpinan */}
-      <div>
-        <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Pimpinan Divisi</h2>
-        <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {renderMemberCard(division.leader, true)}
-          {division.coLeader && renderMemberCard(division.coLeader, true)}
-        </div>
-      </div>
-
-      {/* Anggota */}
-      {division.members.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Anggota Staf</h2>
-          <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {division.members.map((m) => renderMemberCard(m, false))}
-          </div>
-        </div>
-      )}
+   {/* Anggota Staf */}
+   <div>
+     <h2 className="text-2xl font-bold text-slate-950 dark:text-white mb-2">Anggota Staf</h2>
+     <div className="h-1 w-12 bg-slate-900 dark:bg-secondary/50 rounded mb-6"></div>
+     {isLoading ? (
+       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+         {Array.from({ length: 4 }).map((_, i) => (
+           <MemberSkeleton key={i} />
+         ))}
+       </div>
+     ) : (
+       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+         {division.members.map((m) => renderMemberCard(m, false))}
+       </div>
+     )}
+   </div>
 
       {/* Proker Divisi */}
       <div>

@@ -4,9 +4,10 @@ import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
 import { SearchBar } from '../components/SearchBar';
 import { Pagination } from '../components/Pagination';
+import { DocSkeleton } from '../components/Skeleton';
 
 export const DocumentationPage: React.FC = () => {
-  const { divisions } = useData();
+const { divisions, isLoading } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 1;
@@ -59,13 +60,17 @@ export const DocumentationPage: React.FC = () => {
           placeholder="Cari dokumentasi kegiatan atau divisi..."
         />
       </div>
-
-      {paginated.length === 0 ? (
-        <div className="text-center p-16 liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-          {searchQuery ? `Tidak ada dokumentasi kegiatan dengan kata kunci "${searchQuery}".` : 'Belum ada program kerja yang selesai didokumentasikan.'}
-        </div>
-      ) : (
-        <div className="space-y-10">
+{isLoading ? (
+     <div className="space-y-10">
+       <DocSkeleton />
+       <DocSkeleton />
+     </div>
+   ) : paginated.length === 0 ? (
+     <div className="text-center p-16 liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
+       Belum ada program kerja yang selesai didokumentasikan.
+     </div>
+   ) : (
+     <div className="space-y-10">
           {paginated.map((p, idx) => (
             <SpotlightCard key={idx} className="p-8 sm:p-10 space-y-6 border border-slate-300/80 dark:border-secondary/20">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-secondary/15 pb-4">

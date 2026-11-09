@@ -4,9 +4,10 @@ import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
 import { SearchBar } from '../components/SearchBar';
 import { Pagination } from '../components/Pagination';
+import { CardSkeleton } from '../components/Skeleton';
 
 export const CompetitionPage: React.FC = () => {
-  const { competitions } = useData();
+  const { competitions, isLoading } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -51,11 +52,12 @@ export const CompetitionPage: React.FC = () => {
           placeholder="Cari lomba atau penyelenggara..."
         />
       </div>
-
-      {paginated.length === 0 ? (
-        <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-          {searchQuery ? `Tidak ada kompetisi dengan kata kunci "${searchQuery}".` : 'Belum ada info kompetisi saat ini.'}
-        </div>
+{isLoading ? (
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <CardSkeleton key={i} />
+    ))}
+  </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginated.map((c) => (

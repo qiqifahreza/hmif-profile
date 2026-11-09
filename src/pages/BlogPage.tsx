@@ -4,9 +4,10 @@ import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
 import { SearchBar } from '../components/SearchBar';
 import { Pagination } from '../components/Pagination';
+import { CardSkeleton } from '../components/Skeleton';
 
 export const BlogPage: React.FC = () => {
-  const { blogs } = useData();
+  const { blogs, isLoading } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -55,11 +56,12 @@ export const BlogPage: React.FC = () => {
           placeholder="Cari artikel, topik (#tag), atau penulis..."
         />
       </div>
-
-      {paginated.length === 0 ? (
-        <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-          {searchQuery ? `Tidak ada artikel dengan kata kunci "${searchQuery}".` : 'Belum ada artikel yang dipublikasikan.'}
-        </div>
+{isLoading ? (
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <CardSkeleton key={i} />
+    ))}
+  </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginated.map((b) => (

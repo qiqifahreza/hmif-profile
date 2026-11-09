@@ -5,9 +5,10 @@ import { SpotlightCard } from '../components/SpotlightCard';
 import { SearchBar } from '../components/SearchBar';
 import { Pagination } from '../components/Pagination';
 import type { ProkerStatus } from '../types';
+import { CardSkeleton } from '../components/Skeleton';
 
 export const ProkerPage: React.FC = () => {
-  const { divisions } = useData();
+const { divisions, isLoading } = useData();
   const [selectedStatus, setSelectedStatus] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,19 +105,21 @@ export const ProkerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Grid Proker */}
-      {paginated.length === 0 ? (
-        <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-          Tidak ada program kerja yang sesuai dengan pencarian &quot;{searchQuery}&quot;.
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {paginated.map((p, i) => (
-            <SpotlightCard
-              key={i}
-              to={`/proker/${p.divSlug}/${p.idx}`}
-              className="p-6 h-full border border-slate-300/80 dark:border-secondary/20"
-            >
+      {/* GRID PROKER DENGAN SKELETON */}
+   {isLoading ? (
+     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+       {Array.from({ length: 6 }).map((_, i) => (
+         <CardSkeleton key={i} />
+       ))}
+     </div>
+   ) : paginated.length === 0 ? (
+     <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
+       Tidak ada program kerja yang sesuai dengan pencarian &quot;{searchQuery}&quot;.
+     </div>
+   ) : (
+     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+       {paginated.map((p, i) => (
+         <SpotlightCard key={i} to={`/proker/${p.divSlug}/${p.idx}`} className="p-6 h-full border border-slate-300/80 dark:border-secondary/20">
               <div>
                 <div className="flex justify-between items-start gap-2 mb-3">
                   <span className="text-[11px] font-mono uppercase text-slate-500 dark:text-secondary font-bold">{p.divShort}</span>

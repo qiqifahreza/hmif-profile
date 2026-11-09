@@ -4,9 +4,10 @@ import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
 import { SearchBar } from '../components/SearchBar';
 import { Pagination } from '../components/Pagination';
+import { CardSkeleton } from '../components/Skeleton';
 
 export const AnnouncementPage: React.FC = () => {
-  const { announcements } = useData();
+  const { announcements, isLoading } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; 
@@ -51,10 +52,12 @@ export const AnnouncementPage: React.FC = () => {
       </div>
 
       <div className="space-y-6">
-        {paginated.length === 0 ? (
-          <div className="p-12 text-center liquid-glass rounded-2xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-            {searchQuery ? `Tidak ada pengumuman dengan kata kunci "${searchQuery}".` : 'Belum ada pengumuman yang dipublikasikan.'}
-          </div>
+        {isLoading ? (
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <CardSkeleton key={i} />
+    ))}
+  </div>
         ) : (
           paginated.map((a) => (
             <SpotlightCard key={a.id} className="p-6 sm:p-8 border border-slate-300/80 dark:border-secondary/20 space-y-4">
