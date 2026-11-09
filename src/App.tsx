@@ -19,6 +19,8 @@ import { DivisionPage } from './pages/DivisionPage';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 
+// animation Welcome Screen
+import { WelcomeScreen } from './components/WelcomeScreen';
 export const App: React.FC = () => {
   return (
     <DataProvider>
@@ -47,6 +49,7 @@ export const App: React.FC = () => {
                 path="*"
                 element={
                   <>
+                  <WelcomeScreen />
                     <Navbar />
                     <main className="grow pt-16">
                       <Routes>

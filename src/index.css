@@ -106,3 +106,59 @@ html:not(.dark) .liquid-glass-card:hover {
 .password-mask {
   -webkit-text-security: disc !important;
 }
+
+/* ========================================================
+   CUSTOM SCROLLBAR MINIMALIS (RAMPING & MELAYANG)
+   ======================================================== */
+
+/* 1. Pengaturan Lebar (6px super ramping) */
+::-webkit-scrollbar {
+  width: 1px;
+  height: 1px;
+}
+
+/* 2. Track / Jalur Rel Scrollbar (Dibuat Bening / Transparan) */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 3. Batang Scrollbar (Thumb) di MODE TERANG */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.18);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15 23 42 / 0);
+}
+
+/* 4. Batang Scrollbar (Thumb) di MODE GELAP */
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(9 9 210 / 0.76);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(23 23 144 / 0.45);
+}
+
+* {
+  scrollbar-width: none;
+}
+
+html:not(.dark) {
+  scrollbar-color: rgba(27 64 149 / 0.81) transparent;
+}
+
+html.dark {
+  scrollbar-color: rgba(190, 190, 202, 0.25) transparent;
+}
+
+/* Utility Tambahan: Jika ingin menyembunyikan scrollbar di elemen tertentu */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
