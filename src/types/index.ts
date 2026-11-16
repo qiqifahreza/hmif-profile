@@ -80,6 +80,9 @@ export interface SiteSettings {
   secondary_color_dark: string;
   primary_color_light: string;
   secondary_color_light: string;
+  hero_gallery?: GalleryItem[];
+  topography_color?: string;  
+  topography_opacity?: number;
 }
 
 // Kembalikan tipe EventProgram untuk komponen Events.tsx
@@ -90,3 +93,10 @@ export interface EventProgram {
   description: string;
   tag: string;
 }
+
+export interface GalleryItem {
+  image: string;
+  text?: string;
+  description?: string;
+}
+

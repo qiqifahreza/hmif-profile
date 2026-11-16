@@ -131,6 +131,13 @@ export const AdminDashboard: React.FC = () => {
     setShowDocModal(true);
   };
 
+  // State Item Baru Galeri 3D Hero
+const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; description: string }>({
+  image: '',
+  text: '',
+  description: '',
+});
+
   // Buka Modal untuk Edit Dokumentasi yang Sudah Ada
   const handleOpenEditDocModal = (prokerIdx: number) => {
     const p = currentDiv.programs[prokerIdx];
@@ -597,6 +604,153 @@ export const AdminDashboard: React.FC = () => {
                     <div>
                       <label className="block text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">Secondary (Light Mode)</label>
                       <input type="color" value={siteForm.secondary_color_light} onChange={(e) => setSiteForm({...siteForm, secondary_color_light: e.target.value})} className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-slate-200 dark:border-[#3c3c44]" />
+                    </div>
+                  </div>
+                </div>
+                {/* 3. KELOLA GAMBAR GALERI 3D HERO (CIRCULAR GALLERY) */}
+                <div className="p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b] space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 dark:text-white">Galeri 3D Circular Hero (Slider Kanan)</h3>
+                      <p className="text-[11px] text-slate-500 dark:text-[#bebeca]/60">Kelola foto-foto 3D melengkung yang tampil di samping judul beranda.</p>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-slate-700 dark:text-[#bebeca]">Total: {siteForm.hero_gallery?.length || 0}</span>
+                  </div>
+
+                  {/* List Foto Galeri */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {siteForm.hero_gallery?.map((gItem, gIdx) => (
+                      <div key={gIdx} className="relative rounded-xl overflow-hidden border border-slate-300 dark:border-[#3c3c44] bg-black/20 group">
+                        <img src={gItem.image} alt={gItem.text} className="w-full h-24 object-cover" />
+                        <div className="p-1.5 bg-black/70 text-white text-[10px] truncate">
+                          <p className="font-bold truncate">{gItem.text || 'Tanpa Judul'}</p>
+                          <p className="opacity-75 truncate">{gItem.description || '-'}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = siteForm.hero_gallery?.filter((_, i) => i !== gIdx) || [];
+                            setSiteForm({ ...siteForm, hero_gallery: updated });
+                          }}
+                          className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition-transform hover:scale-110 cursor-pointer shadow-md"
+                          title="Hapus foto ini"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Form Tambah Foto Baru ke Galeri 3D */}
+                  <div className="p-3.5 rounded-xl border border-dashed border-slate-300 dark:border-[#3c3c44] bg-slate-50 dark:bg-[#121215] space-y-3">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-white block">+ Tambah Foto ke Galeri 3D</span>
+                    
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Judul foto (misal: Tech Camp 2026)..."
+                        value={newGalItem.text}
+                        onChange={(e) => setNewGalItem({ ...newGalItem, text: e.target.value })}
+                        className="border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Deskripsi singkat..."
+                        value={newGalItem.description}
+                        onChange={(e) => setNewGalItem({ ...newGalItem, description: e.target.value })}
+                        className="border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2 items-center">
+                      <label className="cursor-pointer w-full sm:w-auto px-4 py-2 bg-slate-200 dark:bg-[#232329] hover:bg-slate-300 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-800 dark:text-white flex items-center justify-center gap-2 shrink-0">
+                        <Upload size={14} /> Upload Foto dari Komputer/HP
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, (base64) => setNewGalItem({ ...newGalItem, image: base64 }))}
+                        />
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Atau paste link URL foto..."
+                        value={newGalItem.image}
+                        onChange={(e) => setNewGalItem({ ...newGalItem, image: e.target.value })}
+                        className="flex-1 w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newGalItem.image.trim()) {
+                            alert('Pilih foto atau masukkan URL foto terlebih dahulu!');
+                            return;
+                          }
+                          const currentList = siteForm.hero_gallery || [];
+                          setSiteForm({ ...siteForm, hero_gallery: [...currentList, newGalItem] });
+                          setNewGalItem({ image: '', text: '', description: '' });
+                        }}
+                        className="w-full sm:w-auto px-4 py-2 bg-slate-900 dark:bg-[#bebeca] text-white dark:text-[#121215] text-xs font-bold rounded-xl cursor-pointer shadow-md shrink-0"
+                      >
+                        Tambahkan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {/* PENGATURAN BACKGROUND TOPOGRAPHY 3D (TENGAH KE BAWAH) */}
+                <div className="p-5 rounded-2xl border border-slate-200 dark:border-[#3c3c44] bg-white/70 dark:bg-[#16161b] space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 dark:text-white">
+                        Background Topography 3D (Area Tengah ke Bawah)
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-[#bebeca]/60">
+                        Atur warna garis kontur 3D WebGL dan tingkat ketebalan transparansinya.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {/* Pemilih Warna Topografi */}
+                    <div>
+                      <label className="block text-xs font-mono mb-1.5 text-slate-700 dark:text-slate-300">
+                        Warna Garis Kontur Topografi
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={siteForm.topography_color || '#bebeca'}
+                          onChange={(e) => setSiteForm({ ...siteForm, topography_color: e.target.value })}
+                          className="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-slate-300 dark:border-[#3c3c44]"
+                        />
+                        <input
+                          type="text"
+                          value={siteForm.topography_color || '#bebeca'}
+                          onChange={(e) => setSiteForm({ ...siteForm, topography_color: e.target.value })}
+                          className="flex-1 border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pengatur Opasitas (Slider) */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="text-xs font-mono text-slate-700 dark:text-slate-300">
+                          Tingkat Opasitas (Transparansi)
+                        </label>
+                        <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">
+                          {Math.round((siteForm.topography_opacity ?? 0.45) * 100)}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.05"
+                        max="1"
+                        step="0.05"
+                        value={siteForm.topography_opacity ?? 0.45}
+                        onChange={(e) => setSiteForm({ ...siteForm, topography_opacity: parseFloat(e.target.value) })}
+                        className="w-full accent-slate-900 dark:accent-[#bebeca] cursor-pointer"
+                      />
                     </div>
                   </div>
                 </div>

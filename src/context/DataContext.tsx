@@ -80,6 +80,15 @@ const DEFAULT_SETTINGS: SiteSettings = {
   secondary_color_dark: '#bebeca',
   primary_color_light: '#3c3c44',
   secondary_color_light: '#bebeca',
+  hero_gallery: [
+    { image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800', text: 'Informatics Camp', description: 'Pelatihan skill coding & kolaborasi angkatan.' },
+    { image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800', text: 'Tech Expo UISI', description: 'Pameran karya inovasi mahasiswa Informatika.' },
+    { image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800', text: 'Samvaya Team', description: 'Sinergi pengurus Kabinet Samvaya.' },
+    { image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800', text: 'Hackathon', description: 'Kompetisi memecahkan problem digital.' }
+  ],
+  // Di dalam DEFAULT_SETTINGS:
+  topography_color: '#bebeca',
+  topography_opacity: 0.45,
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);

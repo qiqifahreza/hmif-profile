@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Bell, Calendar, Sparkles, BookOpen } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
+import CircularGallery from '../components/CircularGallery';
 
 export const HomePage: React.FC = () => {
   const { settings, announcements, divisions } = useData();
+
+
 
   const latestAnnouncements = announcements.filter((a) => a.is_published).slice(0, 3);
   const upcomingPrograms = divisions.flatMap((d) =>
@@ -16,25 +19,55 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-20 pb-20">
-      {/* Hero */}
-      <section className="pt-20 pb-16 text-center max-w-5xl mx-auto px-4">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass text-xs font-mono mb-6 border border-slate-300 dark:border-secondary/25 text-slate-800 dark:text-[#bebeca]">
-          <Sparkles size={14} />
-          <span>{settings.cabinet_name} • {settings.period}</span>
-        </div>
-        <h1 className="text-4xl sm:text-6xl font-black tracking-tight mb-6 leading-tight text-slate-950 dark:text-white">
-          {settings.hero_title}
-        </h1>
-        <p className="text-base sm:text-lg text-slate-600 dark:text-[#bebeca]/90 max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
-          {settings.hero_subtitle}
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link to="/proker" className="px-6 py-3 rounded-xl bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] font-bold text-sm shadow-lg hover:opacity-90 transition-all">
-            Lihat Program Kerja
-          </Link>
-          <Link to="/tentang" className="px-6 py-3 rounded-xl liquid-glass border border-slate-300 dark:border-secondary/30 font-medium text-sm text-slate-800 dark:text-white hover:border-slate-500 transition-all">
-            Profil HMIF
-          </Link>
+      {/* Hero Section: 2 Kolom (Teks di Kiri, 3D Circular Gallery di Kanan) */}
+      <section className="pt-16 sm:pt-20 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* KOLOM KIRI: TEKS HERO & CTA */}
+          <div className="lg:col-span-6 text-center lg:text-left space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass text-xs font-mono border border-slate-300 dark:border-secondary/25 text-slate-800 dark:text-[#bebeca]">
+              <Sparkles size={14} className="text-secondary" />
+              <span>{settings.cabinet_name} • {settings.period}</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-slate-950 dark:text-white">
+              {settings.hero_title}
+            </h1>
+
+            <p className="text-sm sm:text-base text-slate-600 dark:text-[#bebeca]/90 leading-relaxed font-normal max-w-xl mx-auto lg:mx-0">
+              {settings.hero_subtitle}
+            </p>
+
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
+              <Link to="/proker" className="px-6 py-3 rounded-xl bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] font-bold text-sm shadow-lg hover:opacity-90 transition-all">
+                Lihat Program Kerja
+              </Link>
+              <Link to="/tentang" className="px-6 py-3 rounded-xl liquid-glass border border-slate-300 dark:border-secondary/30 font-medium text-sm text-slate-800 dark:text-white hover:border-slate-500 transition-all">
+                Profil HMIF
+              </Link>
+            </div>
+          </div>
+
+          {/* KOLOM KANAN: FLAT CAROUSEL (TANPA KOTAK, TANPA TEKS, HANYA BISA DISENTUH/DRAG) */}
+          <div className="lg:col-span-6 w-full flex items-center justify-center">
+            {/* Pembungkus Dibuat Bersih Tanpa Background & Tanpa Border Kotak */}
+            <div className="h-[360px] sm:h-[420px] lg:h-[460px] w-full relative overflow-hidden">
+              <CircularGallery
+                items={settings.hero_gallery && settings.hero_gallery.length > 0 ? settings.hero_gallery : undefined}
+                bend={0}              // <-- 0 = Flat lurus, tidak melengkung
+                wave={0}              // <-- 0 = Tanpa gelombang 3D
+                showTitles={false}    // <-- Hapus teks di bawah gambar
+                enableWheel={false}   // <-- Matikan scroll mouse (hanya bisa disentuh/drag)
+                autoScroll={0.5}        // <-- Diam, hanya bergeser saat disentuh tangan/kursor
+                openOnClick={false}   // <-- Hanya untuk swipe/geser, tidak membuka popup
+                borderRadius={0.08}   // Sudut lengkung kartu foto yang halus
+                itemAspect={0.75}     // Proporsi kartu foto yang proporsional
+                gap={0.12}            // Jarak antar foto
+                scrollSpeed={1.8}     // Kecepatan geser sentuhan yang nyaman
+              />
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -63,6 +96,7 @@ export const HomePage: React.FC = () => {
               </SpotlightCard>
             ))}
           </div>
+          
         </section>
       )}
 
@@ -98,6 +132,7 @@ export const HomePage: React.FC = () => {
               </SpotlightCard>
             ))}
           </div>
+          
         </section>
       )}
 
