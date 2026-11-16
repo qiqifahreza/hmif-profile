@@ -619,26 +619,35 @@ const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; desc
 
                   {/* List Foto Galeri */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {siteForm.hero_gallery?.map((gItem, gIdx) => (
-                      <div key={gIdx} className="relative rounded-xl overflow-hidden border border-slate-300 dark:border-[#3c3c44] bg-black/20 group">
-                        <img src={gItem.image} alt={gItem.text} className="w-full h-24 object-cover" />
-                        <div className="p-1.5 bg-black/70 text-white text-[10px] truncate">
-                          <p className="font-bold truncate">{gItem.text || 'Tanpa Judul'}</p>
-                          <p className="opacity-75 truncate">{gItem.description || '-'}</p>
+                    {/* DAFTAR FOTO DI ADMIN DASHBOARD */}
+                  {!siteForm.hero_gallery || siteForm.hero_gallery.length === 0 ? (
+                    <div className="p-6 text-center border border-dashed border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-500 dark:text-[#bebeca]/60">
+                      Galeri hero saat ini kosong. Gunakan formulir di bawah untuk menambahkan foto kegiatan pertama Anda.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {siteForm.hero_gallery.map((gItem, gIdx) => (
+                        <div key={gIdx} className="relative rounded-xl overflow-hidden border border-slate-300 dark:border-[#3c3c44] bg-black/20 group">
+                          <img src={gItem.image} alt={gItem.text} className="w-full h-24 object-cover" />
+                          <div className="p-1.5 bg-black/70 text-white text-[10px] truncate">
+                            <p className="font-bold truncate">{gItem.text || 'Tanpa Judul'}</p>
+                            <p className="opacity-75 truncate">{gItem.description || '-'}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = siteForm.hero_gallery?.filter((_, i) => i !== gIdx) || [];
+                              setSiteForm({ ...siteForm, hero_gallery: updated });
+                            }}
+                            className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition-transform hover:scale-110 cursor-pointer shadow-md"
+                            title="Hapus foto ini"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updated = siteForm.hero_gallery?.filter((_, i) => i !== gIdx) || [];
-                            setSiteForm({ ...siteForm, hero_gallery: updated });
-                          }}
-                          className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition-transform hover:scale-110 cursor-pointer shadow-md"
-                          title="Hapus foto ini"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
                   </div>
 
                   {/* Form Tambah Foto Baru ke Galeri 3D */}
