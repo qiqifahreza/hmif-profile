@@ -132,10 +132,11 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // State Item Baru Galeri 3D Hero
-const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; description: string }>({
+const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; description: string; date: string }>({
   image: '',
   text: '',
   description: '',
+  date: '',
 });
 
   // Buka Modal untuk Edit Dokumentasi yang Sudah Ada
@@ -649,30 +650,39 @@ const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; desc
                     </div>
                   )}
                   </div>
-
-                  {/* Form Tambah Foto Baru ke Galeri 3D */}
-                  <div className="p-3.5 rounded-xl border border-dashed border-slate-300 dark:border-[#3c3c44] bg-slate-50 dark:bg-[#121215] space-y-3">
-                    <span className="text-[11px] font-bold text-slate-700 dark:text-white block">+ Tambah Foto ke Galeri 3D</span>
+{/* Form Tambah Foto Baru ke Galeri 16:9 */}
+                  <div className="p-4 rounded-xl border border-dashed border-slate-300 dark:border-[#3c3c44] bg-slate-50 dark:bg-[#121215] space-y-3">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-white block">
+                      + Tambah Foto &amp; Informasi (Muncul Saat Kartu Dibalik)
+                    </span>
                     
-                    <div className="grid sm:grid-cols-2 gap-2">
+                    <div className="grid sm:grid-cols-2 gap-2.5">
                       <input
                         type="text"
-                        placeholder="Judul foto (misal: Tech Camp 2026)..."
+                        placeholder="Judul foto (misal: Rapat Kerja Kabinet Samvaya)..."
                         value={newGalItem.text}
                         onChange={(e) => setNewGalItem({ ...newGalItem, text: e.target.value })}
-                        className="border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white"
+                        className="border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
                       />
                       <input
                         type="text"
-                        placeholder="Deskripsi singkat..."
-                        value={newGalItem.description}
-                        onChange={(e) => setNewGalItem({ ...newGalItem, description: e.target.value })}
-                        className="border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white"
+                        placeholder="Tanggal / Label (misal: 18 November 2026)..."
+                        value={newGalItem.date}
+                        onChange={(e) => setNewGalItem({ ...newGalItem, date: e.target.value })}
+                        className="border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
                       />
                     </div>
 
+                    <textarea
+                      rows={3}
+                      placeholder="Informasi lengkap tentang foto ini (ceritakan momen, kegiatan, atau detailnya untuk ditampilkan di balik kartu)..."
+                      value={newGalItem.description}
+                      onChange={(e) => setNewGalItem({ ...newGalItem, description: e.target.value })}
+                      className="w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
+                    />
+
                     <div className="flex flex-col sm:flex-row gap-2 items-center">
-                      <label className="cursor-pointer w-full sm:w-auto px-4 py-2 bg-slate-200 dark:bg-[#232329] hover:bg-slate-300 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-800 dark:text-white flex items-center justify-center gap-2 shrink-0">
+                      <label className="cursor-pointer w-full sm:w-auto px-4 py-2.5 bg-slate-200 dark:bg-[#232329] hover:bg-slate-300 dark:hover:bg-[#3c3c44] border border-slate-300 dark:border-[#3c3c44] rounded-xl text-xs text-slate-800 dark:text-white flex items-center justify-center gap-2 shrink-0">
                         <Upload size={14} /> Upload Foto dari Komputer/HP
                         <input
                           type="file"
@@ -686,7 +696,7 @@ const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; desc
                         placeholder="Atau paste link URL foto..."
                         value={newGalItem.image}
                         onChange={(e) => setNewGalItem({ ...newGalItem, image: e.target.value })}
-                        className="flex-1 w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2 rounded-xl text-xs text-slate-900 dark:text-white"
+                        className="flex-1 w-full border border-slate-300 dark:border-[#3c3c44] bg-white dark:bg-[#19191d] p-2.5 rounded-xl text-xs text-slate-900 dark:text-white"
                       />
                       <button
                         type="button"
@@ -697,9 +707,9 @@ const [newGalItem, setNewGalItem] = useState<{ image: string; text: string; desc
                           }
                           const currentList = siteForm.hero_gallery || [];
                           setSiteForm({ ...siteForm, hero_gallery: [...currentList, newGalItem] });
-                          setNewGalItem({ image: '', text: '', description: '' });
+                          setNewGalItem({ image: '', text: '', description: '', date: '' });
                         }}
-                        className="w-full sm:w-auto px-4 py-2 bg-slate-900 dark:bg-[#bebeca] text-white dark:text-[#121215] text-xs font-bold rounded-xl cursor-pointer shadow-md shrink-0"
+                        className="w-full sm:w-auto px-5 py-2.5 bg-slate-900 dark:bg-[#bebeca] text-white dark:text-[#121215] text-xs font-bold rounded-xl cursor-pointer shadow-md shrink-0"
                       >
                         Tambahkan
                       </button>

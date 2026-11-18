@@ -7,10 +7,10 @@ export const AboutPage: React.FC = () => {
   const { settings, divisions } = useData();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 space-y-16">
+    <div className="w-full px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 py-10 sm:py-12 space-y-14 sm:space-y-16">
       
       {/* Header Profil */}
-      <div className="text-center max-w-3xl mx-auto">
+      <div className="text-center max-w-4xl mx-auto">
         <span className="text-xs font-mono uppercase tracking-widest text-slate-700 dark:text-[#bebeca] bg-slate-200/80 dark:bg-primary/20 px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-secondary/30 font-bold">
           Profil Organisasi
         </span>
@@ -22,9 +22,9 @@ export const AboutPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Kotak Visi & Misi */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <SpotlightCard className="p-8 sm:p-10 rounded-3xl border border-slate-300/80 dark:border-secondary/20">
+      {/* Kotak Visi & Misi (Full Kiri-Kanan 2 Kolom) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+        <SpotlightCard className="p-6 sm:p-8 lg:p-10 rounded-3xl border border-slate-300/80 dark:border-secondary/20">
           <h3 className="text-2xl font-bold mb-4 text-slate-950 dark:text-white flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-slate-900 dark:bg-[#bebeca]" />
             Visi
@@ -34,7 +34,7 @@ export const AboutPage: React.FC = () => {
           </p>
         </SpotlightCard>
 
-        <SpotlightCard className="p-8 sm:p-10 rounded-3xl border border-slate-300/80 dark:border-secondary/20">
+        <SpotlightCard className="p-6 sm:p-8 lg:p-10 rounded-3xl border border-slate-300/80 dark:border-secondary/20">
           <h3 className="text-2xl font-bold mb-4 text-slate-950 dark:text-white flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-slate-900 dark:bg-[#bebeca]" />
             Misi
@@ -50,18 +50,18 @@ export const AboutPage: React.FC = () => {
         </SpotlightCard>
       </div>
 
-      {/* Struktur Kepengurusan */}
+      {/* Struktur Kepengurusan (1 Kolom HP, 2 Kolom Tab, 4 Kolom Desktop Full-Width) */}
       <div>
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">
             Struktur Kepengurusan
           </h2>
-          <p className="text-xs text-slate-600 dark:text-secondary/70 mt-1 font-medium">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-secondary/70 mt-1 font-medium">
             Pilih divisi untuk melihat profil Kadiv, seluruh anggota staf, dan rincian proker.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
           {divisions.map((div) => (
             <SpotlightCard
               key={div.slug}

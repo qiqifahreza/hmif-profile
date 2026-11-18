@@ -10,7 +10,7 @@ export const AnnouncementPage: React.FC = () => {
   const { announcements, isLoading } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; 
+  const itemsPerPage = 5;
 
   const published = useMemo(() => announcements.filter((a) => a.is_published), [announcements]);
 
@@ -30,10 +30,10 @@ export const AnnouncementPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 space-y-10">
+    <div className="w-full px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 py-10 sm:py-12 space-y-10">
       
-      {/* Header Halaman */}
-      <div className="text-center">
+      {/* Header */}
+      <div className="text-center max-w-3xl mx-auto">
         <span className="text-xs font-mono uppercase tracking-widest text-slate-700 dark:text-[#bebeca] bg-slate-200/80 dark:bg-primary/20 px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-secondary/25 font-bold">
           Kanal Informasi Resmi
         </span>
@@ -54,50 +54,52 @@ export const AnnouncementPage: React.FC = () => {
         />
       </div>
 
-      {/* Konten Daftar Pengumuman / Skeleton / Empty State */}
-      <div className="space-y-6">
-        {isLoading ? (
-          <div className="space-y-6">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
-          </div>
-        ) : paginated.length === 0 ? (
-          /* Empty State jika pencarian tidak ditemukan */
-          <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm space-y-3">
-            <p>
-              {searchQuery
-                ? `Tidak ada pengumuman dengan kata kunci "${searchQuery}".`
-                : 'Belum ada pengumuman resmi yang dipublikasikan.'}
-            </p>
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => handleSearch('')}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold cursor-pointer hover:opacity-90 transition-all"
-              >
-                Reset Pencarian
-              </button>
-            )}
-          </div>
-        ) : (
-          paginated.map((a) => (
+      {/* Konten Daftar Pengumuman (1 Kolom HP/Tab, 2 Kolom Laptop/Desktop) */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      ) : paginated.length === 0 ? (
+        <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm space-y-3">
+          <p>
+            {searchQuery
+              ? `Tidak ada pengumuman dengan kata kunci "${searchQuery}".`
+              : 'Belum ada pengumuman resmi yang dipublikasikan.'}
+          </p>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => handleSearch('')}
+              className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold cursor-pointer hover:opacity-90 transition-all"
+            >
+              Reset Pencarian
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {paginated.map((a) => (
             <SpotlightCard key={a.id} className="p-6 sm:p-8 border border-slate-300/80 dark:border-secondary/20 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-[#bebeca]/70">
-                <Calendar size={14} />
-                <span>{a.published_date}</span>
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-[#bebeca]/70 mb-2">
+                  <Calendar size={14} />
+                  <span>{a.published_date}</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white leading-snug">{a.title}</h2>
+                {a.poster_url && (
+                  <img src={a.poster_url} alt={a.title} className="max-h-72 w-full object-contain rounded-xl bg-black/10 my-4" />
+                )}
+                <p className="text-sm text-slate-700 dark:text-[#bebeca]/90 leading-relaxed whitespace-pre-line font-normal mt-3">
+                  {a.content}
+                </p>
               </div>
-              <h2 className="text-2xl font-bold text-slate-950 dark:text-white">{a.title}</h2>
-              {a.poster_url && (
-                <img src={a.poster_url} alt={a.title} className="max-h-96 w-full object-contain rounded-xl bg-black/10 my-4" />
-              )}
-              <p className="text-sm text-slate-700 dark:text-[#bebeca]/90 leading-relaxed whitespace-pre-line font-normal">{a.content}</p>
             </SpotlightCard>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Pagination */}
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );

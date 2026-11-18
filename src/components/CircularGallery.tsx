@@ -12,7 +12,7 @@ export type GalleryItem = {
 export interface CircularGalleryProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'> {
   items?: GalleryItem[];
   bend?: number;
-    enableWheel?: boolean;
+  enableWheel?: boolean;
   textColor?: string;
   borderRadius?: number;
   font?: string;
@@ -596,6 +596,7 @@ const CircularGallery = ({
       const s = settingsRef.current;
       const list = s.items;
       const count = list.length;
+      if (count === 0) return { w: 1, h: 1, spacing: 1, openH: 1, openY: 0, titleSpace: 0 };
       const { w, h, spacing } = measure();
       state.spacing = spacing;
       const introEase = 1 - Math.pow(1 - state.intro, 3);
@@ -1037,8 +1038,8 @@ const CircularGallery = ({
     };
 
     const onWheel = (event: WheelEvent) => {
-    if (!settingsRef.current.enableWheel) return;
-    
+      if (!settingsRef.current.enableWheel) return;
+
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? view.height : 1;
       const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
       if (!delta) return;
@@ -1176,11 +1177,10 @@ const CircularGallery = ({
   });
 
   const count = list.length;
+  if (count === 0) {
+    return null;
+  }
   const current = list[active % count] || list[0];
-
-  if (list.length === 0) {
-  return null;
-}
 
   return (
     <div
@@ -1195,6 +1195,7 @@ const CircularGallery = ({
       <canvas ref={canvasRef} className={CLASSES.canvas} aria-hidden="true" />
       <div ref={labelsRef} className={CLASSES.labels} aria-hidden="true" />
       <div ref={captionRef} className={CLASSES.caption} aria-hidden={!open}>
+        {current?.text && <h4 className="font-bold text-base sm:text-lg mb-1">{current.text}</h4>}
         {current?.description && <p className={CLASSES.captionText}>{current.description}</p>}
       </div>
       <button

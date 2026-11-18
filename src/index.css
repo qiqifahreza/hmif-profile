@@ -298,3 +298,45 @@ html.dark {
   white-space: nowrap;
   border: 0;
 }
+
+/* ========================================================
+   ANIMASI INFINITE MARQUEE TICKER
+   ======================================================== */
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 25s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused; /* Berhenti saat kursor mouse menyentuhnya */
+}
+
+/* ========================================================
+   UTILITAS 3D FLIP CARD (KOMPATIBEL SEMUA BROWSER)
+   ======================================================== */
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

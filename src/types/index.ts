@@ -98,5 +98,6 @@ export interface GalleryItem {
   image: string;
   text?: string;
   description?: string;
+  date?: string;
 }
 

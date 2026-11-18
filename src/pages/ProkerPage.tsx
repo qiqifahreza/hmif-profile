@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom'; // <-- 1. Import Link ditambahkan di sini
+import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
 import { SearchBar } from '../components/SearchBar';
 import { Pagination } from '../components/Pagination';
-import type { ProkerStatus } from '../types';
 import { CardSkeleton } from '../components/Skeleton';
+import type { ProkerStatus } from '../types';
 
 export const ProkerPage: React.FC = () => {
   const { divisions, isLoading } = useData();
@@ -29,7 +29,6 @@ export const ProkerPage: React.FC = () => {
     );
   }, [divisions]);
 
-  // Filter pencarian & status
   const filtered = useMemo(() => {
     return allPrograms.filter((p) => {
       const matchStatus = selectedStatus === 'Semua' || (p.status || 'Direncanakan') === selectedStatus;
@@ -68,7 +67,7 @@ export const ProkerPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 space-y-10">
+    <div className="w-full px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 py-10 sm:py-12 space-y-10">
       <div className="text-center max-w-3xl mx-auto">
         <span className="text-xs font-mono uppercase tracking-widest text-slate-700 dark:text-[#bebeca] bg-slate-200/80 dark:bg-primary/20 px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-secondary/25 font-bold">
           Agenda &amp; Pelaksanaan
@@ -81,7 +80,6 @@ export const ProkerPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Searchbar & Filter Status */}
       <div className="flex flex-col items-center gap-4">
         <SearchBar
           value={searchQuery}
@@ -94,7 +92,7 @@ export const ProkerPage: React.FC = () => {
               key={st}
               type="button"
               onClick={() => handleStatusChange(st)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedStatus === st
                   ? 'bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] shadow-md'
                   : 'bg-white dark:bg-[#1e1e24] border border-slate-300 dark:border-secondary/20 text-slate-700 dark:text-[#bebeca] hover:border-slate-500'
@@ -106,9 +104,8 @@ export const ProkerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* GRID PROKER DENGAN SKELETON */}
       {isLoading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
@@ -127,7 +124,7 @@ export const ProkerPage: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginated.map((p, i) => (
             <SpotlightCard
               key={i}
@@ -149,7 +146,6 @@ export const ProkerPage: React.FC = () => {
                 </p>
               </div>
 
-              {/* 2. BAGIAN BAWAH KARTU (HANYA 1 BARIS BERSIH & RAPI) */}
               <div className="pt-4 border-t border-slate-200 dark:border-secondary/15 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 text-slate-500 dark:text-[#bebeca]/80 font-mono">
                   <Calendar size={14} />
@@ -157,11 +153,10 @@ export const ProkerPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Shortcut Foto Dokumentasi jika proker Selesai */}
                   {p.status === 'Selesai' && (
                     <Link
                       to="/dokumentasi"
-                      onClick={(e) => e.stopPropagation()} // Mencegah bentrok dengan klik kartu
+                      onClick={(e) => e.stopPropagation()}
                       className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
                       title="Lihat foto dokumentasi kegiatan"
                     >
@@ -179,7 +174,6 @@ export const ProkerPage: React.FC = () => {
         </div>
       )}
 
-      {/* Pagination */}
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );

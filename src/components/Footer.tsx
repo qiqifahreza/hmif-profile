@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
       id="kontak"
       className="bg-slate-100 dark:bg-[#0c0c0f] border-t border-slate-300 dark:border-[#3c3c44] text-slate-600 dark:text-[#bebeca] py-6 sm:py-10 transition-colors duration-300"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 text-center sm:text-left">
+      <div className="w-full px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 text-center sm:text-left">
         
         {/* Identitas Organisasi */}
         <div>

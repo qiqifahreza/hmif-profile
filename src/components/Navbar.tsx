@@ -28,7 +28,7 @@ export const Navbar: React.FC = () => {
         backdropFilter: 'blur(16px)',
       }}
     >
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Nama Organisasi */}
           <Link to="/" className="flex items-center space-x-3 group">
