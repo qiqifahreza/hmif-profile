@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom'; // <-- 1. Import Link ditambahkan di sini
 import { Calendar, ArrowRight, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
@@ -8,7 +9,7 @@ import type { ProkerStatus } from '../types';
 import { CardSkeleton } from '../components/Skeleton';
 
 export const ProkerPage: React.FC = () => {
-const { divisions, isLoading } = useData();
+  const { divisions, isLoading } = useData();
   const [selectedStatus, setSelectedStatus] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -106,23 +107,38 @@ const { divisions, isLoading } = useData();
       </div>
 
       {/* GRID PROKER DENGAN SKELETON */}
-   {isLoading ? (
-     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-       {Array.from({ length: 6 }).map((_, i) => (
-         <CardSkeleton key={i} />
-       ))}
-     </div>
-   ) : paginated.length === 0 ? (
-     <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm">
-       Tidak ada program kerja yang sesuai dengan pencarian &quot;{searchQuery}&quot;.
-     </div>
-   ) : (
-     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-       {paginated.map((p, i) => (
-         <SpotlightCard key={i} to={`/proker/${p.divSlug}/${p.idx}`} className="p-6 h-full border border-slate-300/80 dark:border-secondary/20">
+      {isLoading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      ) : paginated.length === 0 ? (
+        <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm space-y-3">
+          <p>Tidak ada program kerja yang sesuai dengan pencarian &quot;{searchQuery}&quot;.</p>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => handleSearchChange('')}
+              className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold cursor-pointer hover:opacity-90 transition-all"
+            >
+              Reset Pencarian
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginated.map((p, i) => (
+            <SpotlightCard
+              key={i}
+              to={`/proker/${p.divSlug}/${p.idx}`}
+              className="p-6 h-full border border-slate-300/80 dark:border-secondary/20 flex flex-col justify-between"
+            >
               <div>
                 <div className="flex justify-between items-start gap-2 mb-3">
-                  <span className="text-[11px] font-mono uppercase text-slate-500 dark:text-secondary font-bold">{p.divShort}</span>
+                  <span className="text-[11px] font-mono uppercase text-slate-500 dark:text-secondary font-bold">
+                    {p.divShort}
+                  </span>
                   {getStatusBadge(p.status)}
                 </div>
                 <h3 className="font-bold text-lg mb-2 text-slate-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-secondary transition-colors leading-snug">
@@ -133,14 +149,30 @@ const { divisions, isLoading } = useData();
                 </p>
               </div>
 
+              {/* 2. BAGIAN BAWAH KARTU (HANYA 1 BARIS BERSIH & RAPI) */}
               <div className="pt-4 border-t border-slate-200 dark:border-secondary/15 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5 text-slate-500 dark:text-[#bebeca]/80 font-mono">
                   <Calendar size={14} />
                   <span>{p.period || 'Coming Soon'}</span>
                 </div>
-                <span className="text-slate-900 dark:text-secondary font-semibold flex items-center gap-1 group-hover:text-blue-600 dark:group-hover:text-white">
-                  Detail <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-                </span>
+
+                <div className="flex items-center gap-3">
+                  {/* Shortcut Foto Dokumentasi jika proker Selesai */}
+                  {p.status === 'Selesai' && (
+                    <Link
+                      to="/dokumentasi"
+                      onClick={(e) => e.stopPropagation()} // Mencegah bentrok dengan klik kartu
+                      className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                      title="Lihat foto dokumentasi kegiatan"
+                    >
+                      Foto 📸
+                    </Link>
+                  )}
+
+                  <span className="text-slate-900 dark:text-secondary font-semibold flex items-center gap-1 group-hover:text-blue-600 dark:group-hover:text-white">
+                    Detail <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </div>
               </div>
             </SpotlightCard>
           ))}

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Bell, Calendar, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowRight, Bell, Calendar, Sparkles, BookOpen, Layers, CheckCircle2, Clock, Users } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { SpotlightCard } from '../components/SpotlightCard';
 import CircularGallery from '../components/CircularGallery';
@@ -8,9 +8,19 @@ import CircularGallery from '../components/CircularGallery';
 export const HomePage: React.FC = () => {
   const { settings, announcements, divisions } = useData();
 
-
-
   const latestAnnouncements = announcements.filter((a) => a.is_published).slice(0, 3);
+  
+  // Hitung metrik dinamis dari database
+  const stats = useMemo(() => {
+    const totalDivisions = divisions.length;
+    const allProkers = divisions.flatMap((d) => d.programs);
+    const totalProkers = allProkers.length;
+    const finishedProkers = allProkers.filter((p) => p.status === 'Selesai').length;
+    const totalMembers = divisions.reduce((acc, curr) => acc + curr.members.length + (curr.leader ? 1 : 0) + (curr.coLeader ? 1 : 0), 0);
+
+    return { totalDivisions, totalProkers, finishedProkers, totalMembers };
+  }, [divisions]);
+
   const upcomingPrograms = divisions.flatMap((d) =>
     d.programs
       .filter((p) => p.status === 'Akan Datang' || p.status === 'Berlangsung')
@@ -18,14 +28,12 @@ export const HomePage: React.FC = () => {
   ).slice(0, 4);
 
   return (
-    <div className="space-y-20 pb-20">
-      {/* Hero Section: Adaptif Otomatis (1 Kolom Tengah jika kosong, 2 Kolom jika ada foto) */}
-      <section className="pt-16 sm:pt-20 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-16 sm:space-y-24 pb-20">
+      
+      {/* 1. Hero Section Adaptif */}
+      <section className="pt-16 sm:pt-20 pb-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {settings.hero_gallery && settings.hero_gallery.length > 0 ? (
-          
-          /* KONDISI 1: ADA FOTO DARI ADMIN -> TAMPIL 2 KOLOM (TEKS KIRI, FOTO KANAN) */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Teks Hero Kiri */}
             <div className="lg:col-span-6 text-center lg:text-left space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass text-xs font-mono border border-slate-300 dark:border-secondary/25 text-slate-800 dark:text-[#bebeca]">
                 <Sparkles size={14} className="text-secondary" />
@@ -47,7 +55,6 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Slider Foto Kanan */}
             <div className="lg:col-span-6 w-full flex items-center justify-center">
               <div className="h-[360px] sm:h-[420px] lg:h-[460px] w-full relative overflow-hidden">
                 <CircularGallery
@@ -66,10 +73,7 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           </div>
-
         ) : (
-
-          /* KONDISI 2: FOTO KOSONG -> TAMPIL RAPI DI TENGAH (CENTERED HERO) */
           <div className="text-center max-w-4xl mx-auto space-y-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass text-xs font-mono border border-slate-300 dark:border-secondary/25 text-slate-800 dark:text-[#bebeca]">
               <Sparkles size={14} className="text-secondary" />
@@ -90,12 +94,57 @@ export const HomePage: React.FC = () => {
               </Link>
             </div>
           </div>
-
         )}
       </section>
-      {/* Pengumuman Terbaru */}
+
+      {/* 2. STATISTIK ORGANISASI (RINGKASAN DATA KABINET) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 sm:p-8 rounded-3xl liquid-glass border border-slate-300/80 dark:border-secondary/20 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <Layers size={20} />
+            </div>
+            <div>
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white block">{stats.totalDivisions}</span>
+              <span className="text-xs text-slate-600 dark:text-[#bebeca]/70 font-medium">Departemen &amp; BPH</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Calendar size={20} />
+            </div>
+            <div>
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white block">{stats.totalProkers}</span>
+              <span className="text-xs text-slate-600 dark:text-[#bebeca]/70 font-medium">Program Kerja</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white block">{stats.finishedProkers}</span>
+              <span className="text-xs text-slate-600 dark:text-[#bebeca]/70 font-medium">Proker Terlaksana</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <Users size={20} />
+            </div>
+            <div>
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white block">{stats.totalMembers}</span>
+              <span className="text-xs text-slate-600 dark:text-[#bebeca]/70 font-medium">Pengurus Samvaya</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Pengumuman Resmi Terbaru */}
       {latestAnnouncements.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-950 dark:text-white">
               <Bell size={20} className="text-slate-700 dark:text-secondary" /> Pengumuman Resmi Terbaru
@@ -118,16 +167,15 @@ export const HomePage: React.FC = () => {
               </SpotlightCard>
             ))}
           </div>
-          
         </section>
       )}
 
-      {/* Proker Terdekat */}
+      {/* 4. Agenda Terdekat */}
       {upcomingPrograms.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-950 dark:text-white">
-              <Calendar size={20} className="text-slate-700 dark:text-secondary" /> Kegiatan Terdekat
+              <Clock size={20} className="text-slate-700 dark:text-secondary" /> Kegiatan Terdekat
             </h2>
             <Link to="/proker" className="text-xs font-semibold text-slate-900 dark:text-secondary hover:underline flex items-center gap-1">
               Lihat Seluruh Proker <ArrowRight size={14} />
@@ -154,22 +202,22 @@ export const HomePage: React.FC = () => {
               </SpotlightCard>
             ))}
           </div>
-          
         </section>
       )}
 
-      {/* Visi Kami */}
-      <section className="max-w-7xl mx-auto px-4">
+      {/* 5. Visi Singkat Organisasi */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SpotlightCard className="p-8 sm:p-12 text-center rounded-3xl border border-slate-300/80 dark:border-secondary/20">
           <h2 className="text-2xl sm:text-3xl font-black mb-4 text-slate-950 dark:text-white">Visi Kami</h2>
           <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-700 dark:text-[#bebeca] leading-relaxed mb-6 font-normal">
             &ldquo;{settings.vision}&rdquo;
           </p>
           <Link to="/tentang" className="inline-flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-secondary hover:underline">
-            <BookOpen size={15} /> Lihat Struktur Lengkap <ArrowRight size={14} />
+            <BookOpen size={15} /> Pelajari Misi &amp; Struktur Organisasi Lengkap <ArrowRight size={14} />
           </Link>
         </SpotlightCard>
       </section>
+
     </div>
   );
 };

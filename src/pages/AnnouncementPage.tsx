@@ -31,6 +31,8 @@ export const AnnouncementPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 space-y-10">
+      
+      {/* Header Halaman */}
       <div className="text-center">
         <span className="text-xs font-mono uppercase tracking-widest text-slate-700 dark:text-[#bebeca] bg-slate-200/80 dark:bg-primary/20 px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-secondary/25 font-bold">
           Kanal Informasi Resmi
@@ -43,6 +45,7 @@ export const AnnouncementPage: React.FC = () => {
         </p>
       </div>
 
+      {/* Searchbar */}
       <div className="flex justify-center">
         <SearchBar
           value={searchQuery}
@@ -51,13 +54,32 @@ export const AnnouncementPage: React.FC = () => {
         />
       </div>
 
+      {/* Konten Daftar Pengumuman / Skeleton / Empty State */}
       <div className="space-y-6">
         {isLoading ? (
-  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {Array.from({ length: 6 }).map((_, i) => (
-      <CardSkeleton key={i} />
-    ))}
-  </div>
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        ) : paginated.length === 0 ? (
+          /* Empty State jika pencarian tidak ditemukan */
+          <div className="p-16 text-center liquid-glass rounded-3xl border border-slate-300 dark:border-secondary/20 text-slate-600 dark:text-[#bebeca]/70 text-sm space-y-3">
+            <p>
+              {searchQuery
+                ? `Tidak ada pengumuman dengan kata kunci "${searchQuery}".`
+                : 'Belum ada pengumuman resmi yang dipublikasikan.'}
+            </p>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => handleSearch('')}
+                className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-[#bebeca] dark:text-[#121215] text-xs font-bold cursor-pointer hover:opacity-90 transition-all"
+              >
+                Reset Pencarian
+              </button>
+            )}
+          </div>
         ) : (
           paginated.map((a) => (
             <SpotlightCard key={a.id} className="p-6 sm:p-8 border border-slate-300/80 dark:border-secondary/20 space-y-4">
@@ -75,6 +97,7 @@ export const AnnouncementPage: React.FC = () => {
         )}
       </div>
 
+      {/* Pagination */}
       <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
     </div>
   );

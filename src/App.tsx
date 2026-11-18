@@ -4,6 +4,8 @@ import { DataProvider } from './context/DataContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { WelcomeScreen } from './components/WelcomeScreen';
+import { ScrollToTop } from './components/ScrollToTop';
+import { BackToTop } from './components/BackToTop';
 
 
 // Halaman-halaman Publik
@@ -28,10 +30,10 @@ import { useData } from './context/DataContext';
 const PublicLayout: React.FC = () => {
   const location = useLocation();
 
-
-
   return (
     <>
+    <ScrollToTop />
+    <BackToTop />
       <WelcomeScreen />
       <Navbar />
       
